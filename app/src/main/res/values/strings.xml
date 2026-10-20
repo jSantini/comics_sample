@@ -1,13 +1,18 @@
 <resources>
     <string name="app_name">Comics</string>
-    <string name="demo_catalog">Demo offline · histórias fictícias</string>
-    <string name="remote_catalog">Catálogo remoto</string>
-    <string name="empty_catalog">Nenhuma história disponível.</string>
-    <string name="retry">Tentar novamente</string>
-    <string name="cover_placeholder">Sem capa</string>
-    <string name="error_network">Não foi possível conectar. Verifique sua conexão.</string>
-    <string name="error_timeout">O serviço demorou para responder.</string>
-    <string name="error_http">O serviço não conseguiu carregar o catálogo.</string>
-    <string name="error_data">O serviço retornou dados inválidos.</string>
-    <string name="error_unexpected">Não foi possível carregar as histórias.</string>
+    <string name="catalog_title">Your reading shelf</string>
+    <string name="demo_catalog">Offline demo</string>
+    <string name="demo_description">Fictional stories, ready without a connection.</string>
+    <string name="remote_catalog">Connected catalog</string>
+    <string name="remote_description">Stories from your connected catalog.</string>
+    <string name="empty_title">A new chapter awaits</string>
+    <string name="empty_catalog">There are no stories to display. Try loading the catalog again.</string>
+    <string name="error_title">Stories could not be loaded</string>
+    <string name="retry">Try again</string>
+    <string name="cover_monogram">C</string>
+    <string name="error_network">Check your connection and try again.</string>
+    <string name="error_timeout">The catalog took too long to respond. Try again in a moment.</string>
+    <string name="error_http">The catalog is unavailable. Try again in a moment.</string>
+    <string name="error_data">The catalog returned an unexpected response. Try loading it again.</string>
+    <string name="error_unexpected">Something interrupted the catalog. Please try again.</string>
 </resources>
