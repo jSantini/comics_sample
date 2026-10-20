@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Comics</string>
+    <string name="demo_catalog">Demo offline · histórias fictícias</string>
+    <string name="remote_catalog">Catálogo remoto</string>
+    <string name="empty_catalog">Nenhuma história disponível.</string>
+    <string name="retry">Tentar novamente</string>
+    <string name="cover_placeholder">Sem capa</string>
+    <string name="error_network">Não foi possível conectar. Verifique sua conexão.</string>
+    <string name="error_timeout">O serviço demorou para responder.</string>
+    <string name="error_http">O serviço não conseguiu carregar o catálogo.</string>
+    <string name="error_data">O serviço retornou dados inválidos.</string>
+    <string name="error_unexpected">Não foi possível carregar as histórias.</string>
 </resources>

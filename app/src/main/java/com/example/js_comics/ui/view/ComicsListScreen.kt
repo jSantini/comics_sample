@@ -1,119 +1,106 @@
 package com.example.js_comics.ui.view
 
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material3.Divider
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.SubcomposeAsyncImage
 import com.example.component.LoadingBar
-import com.example.component.ShowToast
-import com.example.js_comics.data.model.ComicModel
-import com.example.js_comics.ui.theme.ComicsShapes
+import com.example.js_comics.R
+import com.example.js_comics.domain.ComicsFailure
 
 @Composable
-fun ComicsListScreen(comicsViewModel: ComicsViewModel = hiltViewModel()) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        Column {
-            ComicsContent(vm = comicsViewModel)
-        }
-    }
+fun ComicsRoute(viewModel: ComicsViewModel = composeViewModel()) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    ComicsListScreen(state, viewModel::retry)
 }
 
 @Composable
-fun ComicsContent(vm: ComicsViewModel) {
-    vm.state.value.let { state ->
-        when (state) {
-            is Loading -> LoadingBar()
-            is ComicsListUiStateReady -> state.comics?.let { BindList(it) }
-            is ComicsListUiStateError -> state.error?.let { ShowToast(it) }
-        }
-    }
-}
-
-
-@Composable
-fun ListItem(item: ComicModel) {
-    Card(
-        shape = ComicsShapes.large,
-        elevation = 0.dp,
-        modifier = Modifier
-            .height(150.dp)
-            .padding(8.dp)
-            .background(Color.Black)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-                .wrapContentHeight()
-        ) {
-
-            ComicImage(item)
-            Spacer(modifier = Modifier.height(8.dp))
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier
-                    .padding(8.dp)
-            ) {
-                Text(text = item.title, color = Color.White)
-
+fun ComicsListScreen(state: ComicsUiState, onRetry: () -> Unit) {
+    when (state) {
+        ComicsUiState.Loading -> LoadingBar()
+        is ComicsUiState.Content -> Column(Modifier.fillMaxSize()) {
+            SourceLabel(state.isDemo)
+            LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(state.items, key = { it.id }) { ComicCard(it) }
             }
         }
-    }
-    Divider(color = Color.DarkGray, modifier = Modifier.height(0.5.dp))
-}
-
-@Composable
-fun BindList(list: List<ComicModel>) {
-    LazyColumn(contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)) {
-        items(
-            items = list,
-            itemContent = {
-                ListItem(it)
-            })
+        is ComicsUiState.Empty -> Column(Modifier.fillMaxSize()) {
+            SourceLabel(state.isDemo)
+            StatusContent(stringResource(R.string.empty_catalog), onRetry)
+        }
+        is ComicsUiState.Error -> StatusContent(stringResource(state.failure.messageResource()), onRetry)
     }
 }
 
 @Composable
-fun ComicImage(item: ComicModel) {
-    Log.d("jean", "imagem url --> ${item.thumbnail.path}.${item.thumbnail.extension}")
-    Image(
-        painter = rememberAsyncImagePainter("${item.thumbnail.path}.${item.thumbnail.extension}"),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size(120.dp)
-            .padding(end = 8.dp)
+private fun SourceLabel(isDemo: Boolean) {
+    Text(
+        text = stringResource(if (isDemo) R.string.demo_catalog else R.string.remote_catalog),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
     )
 }
 
+@Composable
+private fun StatusContent(message: String, onRetry: () -> Unit) {
+    Column(
+        Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(message, style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onRetry) { Text(stringResource(R.string.retry)) }
+    }
+}
+
+@Composable
+private fun ComicCard(item: ComicItem) {
+    Card(Modifier.fillMaxWidth()) {
+        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            if (item.imageUrl != null) {
+                SubcomposeAsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(88.dp),
+                    loading = { CoverPlaceholder() },
+                    error = { CoverPlaceholder() },
+                )
+            } else CoverPlaceholder()
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(item.title, style = MaterialTheme.typography.titleMedium)
+                item.description?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CoverPlaceholder() {
+    Box(
+        Modifier.size(88.dp).background(MaterialTheme.colorScheme.secondaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(stringResource(R.string.cover_placeholder), style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+private fun ComicsFailure.messageResource(): Int = when (this) {
+    ComicsFailure.NETWORK -> R.string.error_network
+    ComicsFailure.TIMEOUT -> R.string.error_timeout
+    ComicsFailure.HTTP -> R.string.error_http
+    ComicsFailure.INVALID_DATA -> R.string.error_data
+    ComicsFailure.UNEXPECTED -> R.string.error_unexpected
+}

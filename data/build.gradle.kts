@@ -1,7 +1,21 @@
+import java.net.URI
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+}
+
+
+// Non-secret public gateway URL only. Never pass provider credentials as Gradle properties.
+val catalogUrl = providers.gradleProperty("COMICS_BASE_URL").orElse("").get()
+if (catalogUrl.isNotEmpty()) {
+    val uri = runCatching { URI(catalogUrl) }.getOrNull()
+    require(uri != null && uri.scheme == "https" && !uri.host.isNullOrBlank() &&
+        uri.rawUserInfo == null && uri.rawQuery == null && uri.rawFragment == null &&
+        catalogUrl.endsWith("/")) {
+        "COMICS_BASE_URL must be a public HTTPS base URL ending in /, without credentials, query or fragment"
+    }
 }
 
 android {
@@ -10,6 +24,7 @@ android {
 
     defaultConfig {
         minSdk = 21
+        buildConfigField("String", "COMICS_BASE_URL", "\"$catalogUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -38,22 +53,17 @@ android {
 }
 
 dependencies {
-
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    //Retrofit
+    implementation(project(":domain"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
-
-    //DI Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
