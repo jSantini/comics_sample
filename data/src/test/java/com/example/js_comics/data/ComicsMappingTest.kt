@@ -30,7 +30,7 @@ class ComicsMappingTest {
         assertThrows(ComicsException::class.java) { response(ComicDto(1, "One"), ComicDto(1, "Two")).toComics() }
     }
     @Test fun dropsInsecureOrCredentialBearingImageUrls() {
-        listOf("http://images.example.test/a", "https://user:password@images.example.test/a", "https://images.example.test/a?token=fixture", "not a url").forEach {
+        listOf("http://images.example.test/a", "https://user:password@images.example.test/a", "https://images.example.test/a?token=fixture", "https://images.example.test/a#fragment", "file:///tmp/cover", "content://media/cover", "data:image/png;base64,fixture", "javascript:fixture", "not a url").forEach {
             assertNull(response(ComicDto(1, "Title", thumbnail = ThumbnailDto(it, "jpg"))).toComics().single().imageUrl)
         }
     }

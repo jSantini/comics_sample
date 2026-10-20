@@ -1,3 +1,4 @@
+import groovy.json.JsonOutput
 import java.net.URI
 
 plugins {
@@ -13,10 +14,15 @@ if (catalogUrl.isNotEmpty()) {
     val uri = runCatching { URI(catalogUrl) }.getOrNull()
     require(uri != null && uri.scheme == "https" && !uri.host.isNullOrBlank() &&
         uri.rawUserInfo == null && uri.rawQuery == null && uri.rawFragment == null &&
+        (uri.port == -1 || uri.port in 1..65535) &&
         catalogUrl.endsWith("/")) {
         "COMICS_BASE_URL must be a public HTTPS base URL ending in /, without credentials, query or fragment"
     }
 }
+
+// JSON escaping produces a Java-compatible string literal for the validated URI.
+// Serialize the value; never splice unescaped configuration into generated Java.
+val catalogUrlLiteral = JsonOutput.toJson(catalogUrl)
 
 android {
     namespace = "com.example.js_comics.data"
@@ -24,7 +30,7 @@ android {
 
     defaultConfig {
         minSdk = 21
-        buildConfigField("String", "COMICS_BASE_URL", "\"$catalogUrl\"")
+        buildConfigField("String", "COMICS_BASE_URL", catalogUrlLiteral)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

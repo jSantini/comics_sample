@@ -32,7 +32,11 @@ HTTPS controlado por você:
 ```
 
 O endereço acima é apenas um exemplo não operacional. Sem a propriedade, o build é demo.
-A URL deve terminar com `/` e não pode conter usuário, senha, query ou fragmento.
+A URL deve terminar com `/`, usar host ASCII/IPv6 e, se houver porta, estar no intervalo
+1–65535. Não pode conter usuário, senha, query ou fragmento. Caracteres reservados
+inválidos em uma URI, como aspas, espaços e barra invertida, precisam de percent-encoding.
+O literal Java de BuildConfig é serializado com escaping explícito, preservando o valor
+validado, inclusive Unicode no caminho.
 Não use tokens no caminho nem credenciais em propriedades Gradle: a URL é pública
 no APK. Não há autenticação de usuário nesta fase; esse contrato não serve a catálogos privados.
 
@@ -60,6 +64,21 @@ ID positivo e único e título não vazio. Descrição e capa são opcionais. Ca
 HTTP, credenciais, query ou fragmento são descartadas. O manifest bloqueia cleartext;
 o cliente do catálogo não segue redirects e usa verificação TLS padrão e timeouts.
 Não há interceptor de logging de requisições/respostas.
+
+### Capas externas
+
+Coil usa a factory de ImageLoader da Application com um cliente OkHttp exclusivo para
+imagens. Esse cliente exige HTTPS sem userinfo/query/fragmento, usa TLS padrão e timeouts
+e não segue redirects, inclusive no mesmo host ou de HTTPS para HTTP. Não compartilha
+credenciais ou interceptors do catálogo. A validação dos DTOs continua descartando URLs
+fora do contrato antes de chegarem à UI; não há entrada de URI arbitrária do usuário.
+
+Capas que exigem redirecionamento, URLs assinadas por query ou HTTP ficam indisponíveis,
+com o placeholder existente. O demo não tem URLs de imagem e não aciona esse transporte.
+Não há allowlist de hosts, pinning, proxy de imagens ou proteção contra destinos privados:
+o gateway confiável deve selecionar as origens apropriadas. HTTPS não garante reputação,
+privacidade ou disponibilidade do host. A política trata as capas do catálogo; não altera
+os demais fetchers locais suportados pela biblioteca Coil.
 
 Antes de usar dados reais, valide a disponibilidade, o contrato e os termos do provedor,
 atribuição e licenças de imagens. Limites e proteção de abuso pertencem ao gateway.
@@ -97,6 +116,19 @@ Os testes JVM utilizam fakes, `kotlinx-coroutines-test` e MockWebServer, cobrind
 mapeamento, dados inválidos, HTTP, falhas de rede, timeout, cancelamento, estados,
 retry e supressão de requisições concorrentes. O HTTP local existe somente nos testes;
 o app exige HTTPS. Os antigos testes aritméticos foram removidos.
+
+Para verificar a validação da URL e o literal Java gerado de forma reproduzível:
+
+```bash
+python3 scripts/verify_catalog_url.py
+```
+
+O script requer JDK 17, SDK e Python 3, executa Gradle/javac/java com fixtures públicas,
+compara o valor em runtime e restaura o BuildConfig demo ao terminar. Execute-o sem
+outro build simultâneo. Os novos testes de imagens usam TLS loopback e uma CA de teste
+somente no código de testes; a configuração de produção mantém a confiança TLS padrão.
+Não fazem decoding Coil nem validam a interface em Android. Resultados desta revisão:
+[verificações de hardening](docs/review-hardening-validation.md).
 
 Testes instrumentados legados de contexto ainda não são testes de interface.
 Não há validação em emulador/dispositivo, screenshots automatizados ou CI nesta fase. A stack preservada pode reportar incompatibilidade das verificações de lint
