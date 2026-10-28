@@ -40,19 +40,30 @@ INVALID = [
 
 def tool(name):
     java_home = os.environ.get("JAVA_HOME")
-    candidate = Path(java_home) / "bin" / name if java_home else None
-    resolved = str(candidate) if candidate and candidate.is_file() else shutil.which(name)
+    executable = f"{name}.exe" if os.name == "nt" else name
+    candidate = Path(java_home) / "bin" / executable if java_home else None
+    resolved = str(candidate) if candidate and candidate.is_file() else shutil.which(executable)
     if not resolved:
         raise RuntimeError(f"Missing {name}; configure JDK 17 first")
     return resolved
 
 
 def gradle(url=None):
-    command = [str(ROOT / "gradlew"), "--daemon", "--console=plain", "--max-workers=2",
+    # Use the checked-in Windows batch wrapper on Windows, and the shell wrapper elsewhere.
+    wrapper = ROOT / ("gradlew.bat" if os.name == "nt" else "gradlew")
+    if not wrapper.is_file():
+        raise RuntimeError(f"Missing Gradle wrapper: {wrapper}")
+    command = [str(wrapper), "--daemon", "--console=plain", "--max-workers=2",
                ":data:generateDebugBuildConfig"]
-    if url is not None:
-        command.append(f"-PCOMICS_BASE_URL={url}")
-    return subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+    # Pass fixture data through the Gradle project-property environment interface.
+    # Passing -PCOMICS_BASE_URL=... through gradlew.bat lets cmd.exe interpret
+    # &, quotes, percent signs and other URL characters as shell syntax.
+    # Set even for the final restoration to ensure the offline default.
+    env = os.environ.copy()
+    env["ORG_GRADLE_PROJECT_COMICS_BASE_URL"] = "" if url is None else url
+    return subprocess.run(
+        command, cwd=ROOT, env=env, capture_output=True, text=True, errors="replace"
+    )
 
 
 def require_success(result, context):
