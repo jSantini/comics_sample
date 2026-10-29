@@ -1,0 +1,88 @@
+{
+  "base_commit": "ba1b8e187b0e0237cf21c6273241ff39a4742cb7",
+  "baseline": "Pre-hardening working-tree normalized PNG files, not the mislabeled JPEG files in HEAD.",
+  "method": "Reuse the original supplied JPEG bytes under correct .jpg extensions; no re-encoding/resizing. Verify decoded pixels equal normalized PNGs.",
+  "before_total_bytes": 10459473,
+  "after_total_bytes": 1166677,
+  "saved_bytes": 9292796,
+  "assets": [
+    {
+      "key": "alem_orbita",
+      "before_path": "app/src/main/res/drawable-nodpi/cover_alem_orbita.png",
+      "after_path": "app/src/main/res/drawable-nodpi/cover_alem_orbita.jpg",
+      "width": 565,
+      "height": 800,
+      "before_bytes": 665508,
+      "after_bytes": 64745,
+      "decoded_sha256": "512ce4718e058c28a61dd68efb2fd17114330ee5041a63f206c5e7a6bb1027bd",
+      "pixel_equal": true,
+      "lossless_webp_trial_bytes": 456364,
+      "after_sha256": "88bbe613a6ec89413363e0fed5b2ec0991fe5225facc880d735b5df88d93c4a5"
+    },
+    {
+      "key": "aurora",
+      "before_path": "app/src/main/res/drawable-nodpi/cover_aurora.png",
+      "after_path": "app/src/main/res/drawable-nodpi/cover_aurora.jpg",
+      "width": 1024,
+      "height": 1024,
+      "before_bytes": 1532958,
+      "after_bytes": 163708,
+      "decoded_sha256": "76b00019d13d0ba5dd2f6f2e0f0e5342192453a408976990915e6a50387e048d",
+      "pixel_equal": true,
+      "lossless_webp_trial_bytes": 998712,
+      "after_sha256": "ba3fb8eb0dd241b6462172b872da8407d94246ad62fab05486fedc1c9144c9de"
+    },
+    {
+      "key": "cidade_papel",
+      "before_path": "app/src/main/res/drawable-nodpi/cover_cidade_papel.png",
+      "after_path": "app/src/main/res/drawable-nodpi/cover_cidade_papel.jpg",
+      "width": 1400,
+      "height": 1400,
+      "before_bytes": 2528153,
+      "after_bytes": 290412,
+      "decoded_sha256": "46226d649ab5057149e46f28471f50abcfd59d911cd1491e124195fdfca6d9d0",
+      "pixel_equal": true,
+      "lossless_webp_trial_bytes": 1625900,
+      "after_sha256": "d49def95e3ccf7a1bdb979ed9bfe75242999a4e8c54ebc750ef88f1487ee3fb4"
+    },
+    {
+      "key": "eclipse",
+      "before_path": "app/src/main/res/drawable-nodpi/cover_eclipse.png",
+      "after_path": "app/src/main/res/drawable-nodpi/cover_eclipse.jpg",
+      "width": 1170,
+      "height": 1790,
+      "before_bytes": 3549399,
+      "after_bytes": 378101,
+      "decoded_sha256": "2d348371fdbb39a91f083af79f6635162c5f82617e23b1d5ac1d8104be558499",
+      "pixel_equal": true,
+      "lossless_webp_trial_bytes": 2249466,
+      "after_sha256": "75963695424abbc5c1d3db82cd568c76d6c1c3856da41ee073fd417c318662c5"
+    },
+    {
+      "key": "sentinela_neon",
+      "before_path": "app/src/main/res/drawable-nodpi/cover_sentinela_neon.png",
+      "after_path": "app/src/main/res/drawable-nodpi/cover_sentinela_neon.jpg",
+      "width": 1024,
+      "height": 1024,
+      "before_bytes": 1795088,
+      "after_bytes": 220418,
+      "decoded_sha256": "c64901f909b24158d1b3684915965f51dacc740b5556c78d16924a40d29ce6ca",
+      "pixel_equal": true,
+      "lossless_webp_trial_bytes": 1139448,
+      "after_sha256": "86b933842ecaca92fe55d46fc1ef64135364fb822d782ff8c3d27919822bda2b"
+    },
+    {
+      "key": "vigilante",
+      "before_path": "app/src/main/res/drawable-nodpi/cover_vigilante.png",
+      "after_path": "app/src/main/res/drawable-nodpi/cover_vigilante.jpg",
+      "width": 512,
+      "height": 640,
+      "before_bytes": 388367,
+      "after_bytes": 49293,
+      "decoded_sha256": "40aa038365369d919495055b3c93459620434e4776ab2d5c9440658d0d328a26",
+      "pixel_equal": true,
+      "lossless_webp_trial_bytes": 260838,
+      "after_sha256": "4e253f401d3cd4e7ba30fe85317606f6b09395869b075db8dbd7aa7749f65ad2"
+    }
+  ]
+}

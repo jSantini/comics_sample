@@ -15,4 +15,16 @@
     <string name="error_http">The catalog is unavailable. Try again in a moment.</string>
     <string name="error_data">The catalog returned an unexpected response. Try loading it again.</string>
     <string name="error_unexpected">Something interrupted the catalog. Please try again.</string>
+    <string name="cover_loading">Loading cover</string>
+    <string name="cover_unavailable">Cover unavailable</string>
+    <string name="open_details">Open details for %1$s</string>
+    <string name="comic_issue">Issue %1$d</string>
+    <string name="comic_volume">Volume %1$d</string>
+    <string name="comic_series">Series: %1$s</string>
+    <string name="comic_genre">Genre: %1$s</string>
+    <string name="comic_year">Published: %1$d</string>
+    <string name="comic_synopsis">Synopsis</string>
+    <string name="back_to_catalog">Back to catalog</string>
+    <string name="comic_unavailable_title">Story unavailable</string>
+    <string name="comic_unavailable">This story is not in the loaded catalog. Return to the catalog to choose another.</string>
 </resources>

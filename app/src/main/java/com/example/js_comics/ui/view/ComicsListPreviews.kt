@@ -12,8 +12,12 @@ import com.example.js_comics.ui.theme.Js_comicsTheme
 private annotation class CatalogPreviews
 
 private val previewItems = listOf(
-    ComicItem(1, "The paper city", "Two inventors build a place where every street tells a fictional story.", null),
-    ComicItem(2, "Beyond the orbit", "An imaginary crew follows a signal that might lead them home.", null),
+    ComicItem(1, "Aurora: O Primeiro Sinal", "Uma transmissão pode mudar o destino da humanidade.", null,
+        series = "Aurora", issueNumber = 1, genre = "Ficção científica", publicationYear = 2026,
+        synopsis = "Uma missão fictícia além de Netuno investiga uma estação desaparecida.", coverKey = "aurora"),
+    ComicItem(5, "Crônicas do Eclipse: O Último Guardião", "Antigos guardiões despertam.", null,
+        series = "Crônicas do Eclipse", volumeNumber = 1, genre = "Fantasia cósmica", publicationYear = 2026,
+        coverKey = "eclipse"),
 )
 
 @CatalogPreviews
@@ -38,4 +42,10 @@ private fun EmptyPreview() {
 @Composable
 private fun ErrorPreview() {
     Js_comicsTheme { ComicsListScreen(ComicsUiState.Error(ComicsFailure.NETWORK), onRetry = {}) }
+}
+
+@CatalogPreviews
+@Composable
+private fun DetailPreview() {
+    Js_comicsTheme { ComicDetailsScreen(ComicsUiState.Content(previewItems, true), 1, {}, {}) }
 }
