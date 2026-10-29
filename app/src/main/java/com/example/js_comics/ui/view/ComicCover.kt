@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -37,6 +41,20 @@ internal fun localCoverResource(key: String?): Int? = when (key) {
     else -> null
 }
 
+/** Dimensions of the supplied assets; no bitmap/header decoding during composition. */
+internal fun localCoverAspectRatio(key: String?): Float? = when (key) {
+    "aurora", "cidade_papel", "sentinela_neon" -> 1f
+    "alem_orbita" -> 565f / 800f
+    "eclipse" -> 1170f / 1790f
+    "vigilante" -> 512f / 640f
+    else -> null
+}
+
+internal fun coverAspectRatio(width: Float, height: Float): Float? =
+    if (width.isFinite() && height.isFinite() && width > 0f && height > 0f) {
+        (width / height).takeIf { it.isFinite() && it > 0f }
+    } else null
+
 @Composable
 internal fun ComicCover(
     item: ComicItem,
@@ -45,6 +63,8 @@ internal fun ComicCover(
 ) {
     val context = LocalContext.current
     val data = localCoverResource(item.coverKey) ?: item.imageUrl
+    val localRatio = localCoverAspectRatio(item.coverKey)
+    var remoteRatio by remember(data) { mutableStateOf<Float?>(null) }
     val request = remember(context, data) {
         data?.let {
             ImageRequest.Builder(context).data(it)
@@ -54,7 +74,7 @@ internal fun ComicCover(
                 .build()
         }
     }
-    Box(modifier.aspectRatio(2f / 3f).clip(MaterialTheme.shapes.medium)
+    Box(modifier.aspectRatio(localRatio ?: remoteRatio ?: (2f / 3f)).testTag("comic_cover_${item.id}")
         .background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
         if (request == null) CoverPlaceholder() else SubcomposeAsyncImage(
             model = request,
@@ -62,6 +82,14 @@ internal fun ComicCover(
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
+            onSuccess = { success ->
+                if (localRatio == null) {
+                    val size = success.painter.intrinsicSize
+                    if (size != Size.Unspecified) {
+                        coverAspectRatio(size.width, size.height)?.let { remoteRatio = it }
+                    }
+                }
+            },
             // No ORIGINAL size: Coil Compose resolves the finite cover constraints and samples
             // bitmap decoding on IO. Local resource IDs never use the network fetcher.
             loading = { CoverPlaceholder(loading = true) },

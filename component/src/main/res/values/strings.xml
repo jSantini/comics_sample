@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Comics</string>
-    <string name="loading_catalog">Loading stories…</string>
+    <string name="loading_catalog">Carregando catálogo…</string>
 </resources>

@@ -5,6 +5,9 @@ HEAD remains `ba1b8e187b0e0237cf21c6273241ff39a4742cb7`.
 This extends the existing uncommitted catalog/detail implementation; no commit, push,
 merge, toolchain upgrade or agent infrastructure was introduced.
 
+> Historical hardening record before the visual refinement. Current cover ratios, compact
+> cards and Portuguese interface are described in [visual-refinement-validation.md](visual-refinement-validation.md).
+
 ## Synchronous decode and final loading path
 
 The reviewed `ComicCover.kt:41` used `Image(painterResource(resource), ...)` for local

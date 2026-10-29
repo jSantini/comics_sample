@@ -15,6 +15,8 @@ import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.platform.app.InstrumentationRegistry
+import com.example.js_comics.R
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.js_comics.domain.ComicsFailure
 import com.example.js_comics.ui.theme.Js_comicsTheme
@@ -33,6 +35,8 @@ class ComicNavigationTest {
         ComicItem(42, "Second story", null, null),
     )
     private val state = ComicsUiState.Content(items, true)
+    private fun text(id: Int, vararg args: Any) =
+        InstrumentationRegistry.getInstrumentation().targetContext.getString(id, *args)
 
     @Test fun wholeCardCallsBackWithItsStableId() {
         var selected: Int? = null
@@ -67,7 +71,7 @@ class ComicNavigationTest {
 
     @Test fun detailShowsMetadataAndFullSynopsisInsteadOfShortText() {
         compose.setContent { Js_comicsTheme { ComicDetailsScreen(state, 11, {}, {}) } }
-        listOf("Series: Series A", "Issue 3", "Genre: Science fiction", "Published: 2026").forEach {
+        listOf(text(R.string.comic_series, "Series A"), text(R.string.comic_issue, 3), text(R.string.comic_genre, "Science fiction"), text(R.string.comic_year, 2026)).forEach {
             compose.onNodeWithText(it).performScrollTo().assertIsDisplayed()
         }
         compose.onNodeWithTag("details_synopsis").performScrollTo().assertTextEquals(items.first().synopsis!!)
@@ -77,8 +81,8 @@ class ComicNavigationTest {
     @Test fun volumeDoesNotInventAnIssue() {
         val item = ComicItem(5, "Volume story", null, null, volumeNumber = 1)
         compose.setContent { Js_comicsTheme { ComicDetailsScreen(ComicsUiState.Content(listOf(item), true), 5, {}, {}) } }
-        compose.onNodeWithText("Volume 1").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Issue", substring = true).assertDoesNotExist()
+        compose.onNodeWithText(text(R.string.comic_volume, 1)).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText(text(R.string.comic_issue, 0).substringBefore("0"), substring = true).assertDoesNotExist()
     }
 
     @Test fun incompleteRemoteItemDoesNotInventMetadata() {
@@ -86,10 +90,10 @@ class ComicNavigationTest {
         compose.onNodeWithTag("details_title").performScrollTo().assertTextEquals("Second story")
         compose.onNodeWithTag(ComicsScreenTags.REMOTE).assertExists()
         compose.onNodeWithTag("details_synopsis").assertDoesNotExist()
-        listOf("Series:", "Issue", "Volume", "Genre:", "Published:").forEach {
+        listOf(text(R.string.comic_series, ""), text(R.string.comic_issue, 0).substringBefore("0"), text(R.string.comic_volume, 0).substringBefore("0"), text(R.string.comic_genre, ""), text(R.string.comic_year, 0).substringBefore("0")).forEach {
             compose.onNodeWithText(it, substring = true).assertDoesNotExist()
         }
-        compose.onNodeWithContentDescription("Cover unavailable").assertExists()
+        compose.onNodeWithContentDescription(text(R.string.cover_unavailable)).assertExists()
     }
 
     @Test fun invalidIdHasRecoveryAndBackCallback() {

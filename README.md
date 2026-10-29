@@ -6,7 +6,7 @@ It is a reviewable engineering exercise, not a production-readiness claim.
 
 The default app is an **offline demo** containing six fictional comics and bundled cover
 images. It does not call Marvel, require credentials, or download images. The existing
-story fixtures are fictional Portuguese text; the interface and project guide are in English.
+story fixtures are fictional Portuguese text; the interface is in Portuguese; this project guide is in English.
 
 ## What the app demonstrates
 
@@ -34,17 +34,21 @@ All six fictional comics use the supplied Portuguese story text and publication 
 | 5 | Crônicas do Eclipse: O Último Guardião | Volume 1; no issue supplied | `eclipse` |
 | 6 | O Vigilante das Sombras: Caso Zero | Issue 1 | `vigilante` |
 
-Cards show genre, edition and short synopsis. Details show the full supplied synopsis,
-series, edition, genre and year when available. Demo identification remains visible.
+Compact catalog cards place the cover on the left and title, genre, edition and a maximum
+three-line summary on the right. Titles and metadata can wrap as fonts grow. Details use
+a compact top app bar with an accessible back icon, show title/metadata first and cap the
+cover height at 200dp before the full synopsis. Demo identification remains visible.
 
 `ComicCover.kt` maps domain-neutral keys to `drawable-nodpi/cover_*.jpg` only in `:app`.
 Bundled images take precedence over remote URLs; demo records have no URLs, so rendering
 never requires image downloads. Both resource IDs and remote URLs use Coil with IO fetch/decode
 dispatchers. Coil Compose resolves the finite cover constraints for sampled decoding rather
 than requesting the original bitmap size; memory caching is retained. Unknown keys fall back to the secure remote image loader
-or an accessible placeholder. Both screens use 2:3 cover containers with `ContentScale.Fit`
-to preserve all artwork, including square source covers, rather than crop titles/art.
-Cards grow with text; details/status content scroll, with a back control at least 48dp.
+or an accessible placeholder. Known local image ratios come from presentation-only dimensions;
+remote ratios update from a successful Coil painter (2:3 is only the unknown-image fallback).
+`ContentScale.Fit` preserves the full artwork, titles and credits. Catalog covers fit within
+88dp × 132dp and detail covers within 280dp × 200dp, without forcing a portrait canvas onto
+square artwork. Card text can grow and details/status content scroll; back targets remain 48dp.
 
 The supplied files had JPEG bytes under PNG extensions. Hardening reuses their original
 JPEG bytes with correct `.jpg` names instead of re-encoding the intermediate normalized PNGs.
@@ -218,7 +222,8 @@ Cover pipeline tests inject an ImageLoader to verify source precedence/failures 
 external HTTP; a wrapped bitmap decoder checks off-main execution and sampled resource size.
 A legacy context test also remains. Compiling these tests is not executing them.
 
-See [Cover/integration hardening validation](docs/cover-hardening-validation.md),
+See [Visual refinement validation](docs/visual-refinement-validation.md),
+[Cover/integration hardening validation](docs/cover-hardening-validation.md),
 [Catalog and details validation before hardening](docs/catalog-details-validation.md),
 [Phase 2 evidence and limitations](docs/phase-two-validation.md),
 [Phase 1 evidence](docs/phase-one-validation.md) and

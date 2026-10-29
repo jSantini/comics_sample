@@ -21,6 +21,22 @@ class ComicPresentationTest {
         assertNull(localCoverResource("https://untrusted.example/cover"))
     }
 
+    @Test fun suppliedCoverRatiosMatchOriginalDimensions() {
+        val expected = mapOf("aurora" to 1f, "cidade_papel" to 1f, "sentinela_neon" to 1f,
+            "alem_orbita" to (565f / 800f), "eclipse" to (1170f / 1790f), "vigilante" to (512f / 640f))
+        expected.forEach { (key, ratio) -> assertEquals(ratio, localCoverAspectRatio(key)!!, 0.0001f) }
+        assertNull(localCoverAspectRatio(null))
+        assertNull(localCoverAspectRatio("unknown"))
+    }
+
+    @Test fun remoteRatiosRequirePositiveFiniteDimensions() {
+        assertEquals(2f, coverAspectRatio(200f, 100f)!!, 0.0001f)
+        listOf(0f, -1f, Float.NaN, Float.POSITIVE_INFINITY).forEach {
+            assertNull(coverAspectRatio(it, 100f))
+            assertNull(coverAspectRatio(100f, it))
+        }
+    }
+
     @Test fun presentationPreservesAllDomainMetadataAndText() {
         val item = Comic(5, "Title", "Legacy", null, "Series", null, 1,
             "Genre", 2026, "Short", "Full synopsis", "eclipse").toComicItem()

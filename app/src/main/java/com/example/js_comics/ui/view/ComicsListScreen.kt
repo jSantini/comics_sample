@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -93,16 +94,16 @@ fun ComicsListScreen(state: ComicsUiState, onRetry: () -> Unit, onComicClick: (I
 }
 
 @Composable
-internal fun SourceLabel(isDemo: Boolean, modifier: Modifier = Modifier) {
+internal fun SourceLabel(isDemo: Boolean, modifier: Modifier = Modifier, compact: Boolean = false) {
     Surface(
         modifier.widthIn(max = 720.dp).fillMaxWidth().testTag(if (isDemo) ComicsScreenTags.DEMO else ComicsScreenTags.REMOTE),
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = if (compact) 8.dp else 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(if (isDemo) R.string.demo_catalog else R.string.remote_catalog), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(if (isDemo) R.string.demo_description else R.string.remote_description), style = MaterialTheme.typography.bodyMedium)
+            if (!compact) Text(stringResource(if (isDemo) R.string.demo_description else R.string.remote_description), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -137,17 +138,21 @@ private fun ComicCard(item: ComicItem, onComicClick: (Int) -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                ComicCover(item, Modifier.width(104.dp))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(item.title, style = MaterialTheme.typography.titleLarge)
-                    item.genre?.let { Text(it, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) }
-                    IssueOrVolume(item)
-                }
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.width(88.dp), contentAlignment = Alignment.TopCenter) {
+                ComicCover(item, Modifier.widthIn(max = 88.dp).heightIn(max = 132.dp))
             }
-            item.shortSynopsis?.let {
-                Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(item.title, style = MaterialTheme.typography.titleMedium)
+                item.genre?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary) }
+                IssueOrVolume(item)
+                item.shortSynopsis?.let {
+                    Text(it, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 3, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("comic_summary_${item.id}"))
+                }
             }
         }
     }

@@ -42,6 +42,8 @@ class ComicCoverPipelineTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val loaders = mutableListOf<ImageLoader>()
     private val observedData = CopyOnWriteArrayList<Any>()
+    private val unavailable get() = context.getString(R.string.cover_unavailable)
+    private val loading get() = context.getString(R.string.cover_loading)
     private val remote = "https://images.example.test/fixture.webp"
 
     @After fun closeImageLoaders() { loaders.forEach { it.shutdown() } }
@@ -76,30 +78,30 @@ class ComicCoverPipelineTest {
 
     @Test fun absentCoverShowsPlaceholderWithoutSubmittingARequest() {
         show(ComicItem(1, "Fixture", null, null, coverKey = "missing"), loader())
-        compose.onNodeWithContentDescription("Cover unavailable").assertIsDisplayed()
+        compose.onNodeWithContentDescription(unavailable).assertIsDisplayed()
         compose.runOnIdle { assertTrue(observedData.isEmpty()) }
     }
 
     @Test fun failedLocalDecodeShowsPlaceholderWithoutTryingTheRemoteUrl() {
         show(ComicItem(1, "Fixture", null, remote, coverKey = "aurora"), loader(fail = true))
-        compose.waitUntil { compose.onAllNodesWithContentDescription("Cover unavailable").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithContentDescription("Cover unavailable").assertIsDisplayed()
+        compose.waitUntil { compose.onAllNodesWithContentDescription(unavailable).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithContentDescription(unavailable).assertIsDisplayed()
         compose.runOnIdle { assertEquals(listOf(R.drawable.cover_aurora), observedData.toList()) }
     }
 
     @Test fun failedRemoteDecodeShowsAccessiblePlaceholder() {
         show(ComicItem(1, "Fixture", null, remote), loader(fail = true))
-        compose.waitUntil { compose.onAllNodesWithContentDescription("Cover unavailable").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithContentDescription("Cover unavailable").assertIsDisplayed()
+        compose.waitUntil { compose.onAllNodesWithContentDescription(unavailable).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithContentDescription(unavailable).assertIsDisplayed()
     }
 
     @Test fun loadingAndFailureHaveDistinctAccessibleLabels() {
         val gate = CompletableDeferred<Unit>()
         show(ComicItem(1, "Fixture", null, remote), loader(fail = true, gate = gate))
-        compose.onNodeWithContentDescription("Loading cover").assertIsDisplayed()
+        compose.onNodeWithContentDescription(loading).assertIsDisplayed()
         gate.complete(Unit)
-        compose.waitUntil { compose.onAllNodesWithContentDescription("Cover unavailable").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithContentDescription("Loading cover").assertDoesNotExist()
+        compose.waitUntil { compose.onAllNodesWithContentDescription(unavailable).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithContentDescription(loading).assertDoesNotExist()
     }
 
     @Test fun bundledBitmapDecoderRunsOffMainAndSamplesForTheCoverConstraints() {
