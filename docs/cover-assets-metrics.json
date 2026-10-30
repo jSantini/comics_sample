@@ -1,11 +1,11 @@
 {
-  "base_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b",
-  "baseline": "New owner-supplied AI-generated PNG covers in base commit; not historical JPEGs.",
+  "base_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+  "baseline": "Corrected owner-supplied AI PNGs for sentinela_neon/eclipse/vigilante at source_commit; other three unchanged from original conversion. Each asset records its own source_commit.",
   "method": "Pillow lossless WebP method=6; unchanged RGB pixels and dimensions; no crop or resizing.",
   "pillow_version": "12.3.0",
   "webp_version": "1.6.0",
-  "before_total_bytes": 16558056,
-  "after_total_bytes": 12537854,
+  "before_total_bytes": 15964404,
+  "after_total_bytes": 12165196,
   "assets": [
     {
       "key": "alem_orbita",
@@ -26,7 +26,8 @@
         "jpeg_q95": 1000136,
         "webp_q95": 627048,
         "webp_lossless": 2137570
-      }
+      },
+      "source_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b"
     },
     {
       "key": "aurora",
@@ -47,7 +48,8 @@
         "jpeg_q95": 834249,
         "webp_q95": 520264,
         "webp_lossless": 1948736
-      }
+      },
+      "source_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b"
     },
     {
       "key": "cidade_papel",
@@ -68,72 +70,82 @@
         "jpeg_q95": 1004613,
         "webp_q95": 625880,
         "webp_lossless": 2165048
-      }
+      },
+      "source_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b"
     },
     {
       "key": "eclipse",
       "source_path": "app/src/main/res/drawable-nodpi/cover_eclipse.png",
       "source_format": "PNG",
-      "source_bytes": 2746712,
-      "source_sha256": "d6574bca7ab89f6a7f251a639bf655146e97845fdd9414dceaf03972d891259d",
+      "source_bytes": 2490950,
+      "source_sha256": "80916782d315e356d15dbb56c28e84b812923f022b321c76fa678b1af213bbcc",
       "path": "app/src/main/res/drawable-nodpi/cover_eclipse.webp",
       "format": "WEBP",
       "width": 1024,
       "height": 1536,
-      "bytes": 2184440,
-      "sha256": "8e0fecca598282bf58eb3b37b5f2962b8cccc30d0ae1e1399f229d48f3c5043b",
-      "decoded_rgb_sha256": "ab313373ddffcccea1f6f0974f3fd40fa371bd6d9e5cc59d76fbd834838b2fed",
+      "bytes": 1992770,
+      "sha256": "384affb1d121f803e63d5236c43aee28aaa034d9f9626cb7ed5e18f0411a95f2",
+      "decoded_rgb_sha256": "58a459ffebb44167fae5150e882783743a6539535446662a093b6b426560481f",
       "pixel_equal": true,
       "candidate_bytes": {
-        "png_optimized": 2658216,
-        "jpeg_q95": 994642,
-        "webp_q95": 596226,
-        "webp_lossless": 2184440
+        "webp_lossless": 1992770
+      },
+      "source_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+      "previous_webp": {
+        "commit": "bea9f0642038b3a73b84d8205ab2d4059b0528ce",
+        "bytes": 2184440,
+        "sha256": "8e0fecca598282bf58eb3b37b5f2962b8cccc30d0ae1e1399f229d48f3c5043b"
       }
     },
     {
       "key": "sentinela_neon",
       "source_path": "app/src/main/res/drawable-nodpi/cover_sentinela_neon.png",
       "source_format": "PNG",
-      "source_bytes": 2860703,
-      "source_sha256": "7d6c75063bcd322131d868ee48723ebf4a0eb9a1e87b3a629c68d958414bf7c1",
+      "source_bytes": 2686962,
+      "source_sha256": "681797adde365363058cfa265be70c326935af30e86666eeae95c5e6c68752dc",
       "path": "app/src/main/res/drawable-nodpi/cover_sentinela_neon.webp",
       "format": "WEBP",
       "width": 1024,
       "height": 1536,
-      "bytes": 2198152,
-      "sha256": "d5f944ed29ff61528be43e44c3b185cd5b260cda3553b48d5519b3265c828c1b",
-      "decoded_rgb_sha256": "91526e7272ad8071d9816b3ea7c630b033b957f65b1cad03961de6fa28c48d2b",
+      "bytes": 2100132,
+      "sha256": "a47fd8621b42b03187d48e26787499777b6221eda8c832d62f689c4f348b8132",
+      "decoded_rgb_sha256": "b0b8f8586d4d0d62ea3ee18120b3a49c7c7b711e55e07cda8defb19599347763",
       "pixel_equal": true,
       "candidate_bytes": {
-        "png_optimized": 2758293,
-        "jpeg_q95": 983705,
-        "webp_q95": 599824,
-        "webp_lossless": 2198152
+        "webp_lossless": 2100132
+      },
+      "source_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+      "previous_webp": {
+        "commit": "bea9f0642038b3a73b84d8205ab2d4059b0528ce",
+        "bytes": 2198152,
+        "sha256": "d5f944ed29ff61528be43e44c3b185cd5b260cda3553b48d5519b3265c828c1b"
       }
     },
     {
       "key": "vigilante",
       "source_path": "app/src/main/res/drawable-nodpi/cover_vigilante.png",
       "source_format": "PNG",
-      "source_bytes": 2501611,
-      "source_sha256": "af7e5302a21099508db379ed0ec58d09e7b792b96a910a8f6438023eeaa35385",
+      "source_bytes": 2337462,
+      "source_sha256": "4b55f2295fd2e4afd9a10197e77b85ebe5b877c0d204415020d0c1535b2e3edf",
       "path": "app/src/main/res/drawable-nodpi/cover_vigilante.webp",
       "format": "WEBP",
       "width": 1024,
       "height": 1536,
-      "bytes": 1903908,
-      "sha256": "d2b3ebbaa8ec2aa430e8754b262a7e00bd620855d547d3a6098b4d83c62cd27e",
-      "decoded_rgb_sha256": "ef5f98e8584729e3f1bc162f841b2cd103230de37ffb794350e7dff4321b53c3",
+      "bytes": 1820940,
+      "sha256": "79413b797713ffa67268cb32e0b7c3a69ce8eb349bbcd694f9b8589cecfe8167",
+      "decoded_rgb_sha256": "49e0a225db6b5a2668a7cd416402430db43b75fc8f4b0927758168216b58f674",
       "pixel_equal": true,
       "candidate_bytes": {
-        "png_optimized": 2403207,
-        "jpeg_q95": 894738,
-        "webp_q95": 536830,
-        "webp_lossless": 1903908
+        "webp_lossless": 1820940
+      },
+      "source_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+      "previous_webp": {
+        "commit": "bea9f0642038b3a73b84d8205ab2d4059b0528ce",
+        "bytes": 1903908,
+        "sha256": "d2b3ebbaa8ec2aa430e8754b262a7e00bd620855d547d3a6098b4d83c62cd27e"
       }
     }
   ],
-  "saved_bytes": 4020202,
-  "saved_percent": 24.279432
+  "saved_bytes": 3799208,
+  "saved_percent": 23.797995
 }

@@ -52,9 +52,12 @@ remote ratios update from a successful Coil painter (2:3 is only the unknown-ima
 The current six covers were generated with AI specifically for the fictional catalog,
 as reported by the owner, and supplied as genuine 1024 × 1536 PNGs. All use 2:3 ratios.
 Lossless WebP preserves every decoded RGB pixel without cropping, resizing or removing
-credits: 16,558,056 source bytes become 12,537,854 bytes (24.28% reduction).
-This is encoded-resource size, not a measured runtime/heap improvement. Smaller lossy
-JPEG/WebP candidates were measured but not selected to preserve text and fine detail exactly.
+credits: 15,964,404 source bytes become 12,165,196 bytes (23.80% reduction).
+The corrected Sentinela, Eclipse and Vigilante covers now match the catalog titles and
+edition/volume labels; the other three resource files are unchanged.
+This is encoded-resource size, not a measured runtime/heap improvement. The historical
+six-cover comparison measured smaller lossy JPEG/WebP candidates; those measurements do
+not describe the three corrected sources. Lossless conversion preserves text and detail exactly.
 See [current metrics](docs/cover-assets-metrics.json) and
 [validation and historical record](docs/cover-hardening-validation.md).
 [Provenance and licensing limits](docs/image-licensing.md) remain separate from technical validation.

@@ -3,8 +3,11 @@
 ## Current AI-generated covers — 2026-10-30
 
 The owner reports that the six replacement covers were generated with AI specifically
-for this fictional catalog. Source PNGs are recorded in commit
-`89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b`; the current resources are the corresponding
+for this fictional catalog. Original PNGs for Aurora, Cidade de Papel and Além da Órbita are recorded in commit
+`89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b`; corrected PNGs for Sentinela Neon,
+Crônicas do Eclipse and O Vigilante das Sombras are recorded in
+`109a0e9e39f01ea486b138910e3e57d3e77002a9`. The same owner-reported AI provenance
+applies to these corrected versions; the current resources are the corresponding
 `cover_aurora.webp`, `cover_cidade_papel.webp`, `cover_alem_orbita.webp`,
 `cover_sentinela_neon.webp`, `cover_eclipse.webp` and `cover_vigilante.webp`.
 Lossless conversion preserves all RGB pixels, titles, signatures and credits; no crop,

@@ -1,3 +1,125 @@
+# Corrected three covers — 2026-10-30
+
+Branch `feature/offline-comics-details`; source HEAD
+`109a0e9e39f01ea486b138910e3e57d3e77002a9`. No commit, push, merge or history rewrite.
+
+## Source and visual verification
+
+The requested descriptive input filenames were not present. The corrected images were
+already supplied in the source commit as `cover_sentinela_neon.png`, `cover_eclipse.png`
+and `cover_vigilante.png` in `app/src/main/res/drawable-nodpi/` (not old snapshots).
+Each is a genuine 1024 × 1536 RGB PNG with a 2:3 ratio. Direct visual inspection confirmed:
+
+- Sentinela Neon: Memórias Roubadas — Edição 5.
+- Crônicas do Eclipse: O Último Guardião — Volume 1.
+- O Vigilante das Sombras: Caso Zero — Edição 1.
+
+Thus the three printed edition/title differences recorded below are historical and are
+resolved in these supplied replacements. Domain/catalog metadata has not been changed.
+
+Conversion uses Pillow 12.3.0 / libwebp 1.6.0, `format="WEBP", lossless=True, method=6`.
+Decoded RGB bytes and dimensions are identical between each new PNG and its final WebP;
+no crop, resize, color editing, recoloring or credit removal. Each PNG is removed from the
+current resource folder after conversion, leaving exactly six WebPs with the same names.
+Aurora, Cidade de Papel and Além da Órbita retain their previous bytes and hashes.
+
+[Current metrics](cover-assets-metrics.json) record `source_commit` per asset because the
+three unchanged sources and three corrected sources originate in different commits.
+`previous_webp` records the superseded WebP sizes/hashes for only the corrected assets.
+The old PNG/JPEG/WebP comparison totals below concern previous artwork, not this set.
+
+## Current and previous sizes
+
+The previous WebP column refers to the published `bea9f06` version; the source HEAD
+already replaced those three WebPs with corrected PNGs. Sizes are encoded file bytes.
+
+| Resource | Previous WebP | Corrected PNG | New lossless WebP |
+| --- | ---: | ---: | ---: |
+| cover_sentinela_neon | 2,198,152 | 2,686,962 | 2,100,132 |
+| cover_eclipse | 2,184,440 | 2,490,950 | 1,992,770 |
+| cover_vigilante | 1,903,908 | 2,337,462 | 1,820,940 |
+
+The three corrected PNGs total 7,515,374 bytes; their final WebPs total 5,913,842 bytes.
+The current six-resource set totals 12,165,196 bytes. Per-asset SHA-256 values are in
+`cover-assets-metrics.json`; all dimensions remain 1024 × 1536.
+
+## Reproduce current asset checks
+
+From repository root with Python and Pillow:
+
+```python
+import hashlib, io, json, subprocess
+from pathlib import Path
+from PIL import Image
+metrics = json.loads(Path("docs/cover-assets-metrics.json").read_text())
+assert set(Path("app/src/main/res/drawable-nodpi").glob("cover_*")) == {
+    Path(asset["path"]) for asset in metrics["assets"]
+}
+for asset in metrics["assets"]:
+    raw = subprocess.check_output(["git", "show", asset["source_commit"] + ":" + asset["source_path"]])
+    assert len(raw) == asset["source_bytes"]
+    assert hashlib.sha256(raw).hexdigest() == asset["source_sha256"]
+    source = Image.open(io.BytesIO(raw)); source.load()
+    encoded = Path(asset["path"]).read_bytes()
+    final = Image.open(io.BytesIO(encoded)); final.load()
+    assert source.format == "PNG" and final.format == "WEBP"
+    assert source.mode == final.mode == "RGB"
+    assert source.size == final.size == (1024, 1536)
+    assert len(encoded) == asset["bytes"]
+    assert hashlib.sha256(encoded).hexdigest() == asset["sha256"]
+    assert source.tobytes() == final.tobytes()
+    assert hashlib.sha256(final.tobytes()).hexdigest() == asset["decoded_rgb_sha256"]
+    if "previous_webp" not in asset:
+        before = subprocess.check_output(["git", "show", "bea9f0642038b3a73b84d8205ab2d4059b0528ce:" + asset["path"]])
+        assert before == encoded
+print("Six formats, dimensions, hashes and source pixels verified; other three covers unchanged")
+```
+
+## Validation of this correction
+
+Actual local results (JDK 17, existing toolchain, demo endpoint empty):
+
+```bash
+./gradlew --no-daemon --max-workers=2 :app:assembleDebug testDebugUnitTest \
+  :domain:test :app:lintDebug :data:lintDebug :component:lintDebug \
+  :app:assembleDebugAndroidTest -PCOMICS_BASE_URL=
+# Explicit per-task reruns to avoid reporting cached JVM results as newly executed:
+./gradlew --no-daemon --max-workers=2 :app:testDebugUnitTest --rerun \
+  :data:testDebugUnitTest --rerun -PCOMICS_BASE_URL=
+./gradlew --no-daemon --max-workers=2 :app:compileDebugAndroidTestKotlin --rerun \
+  :app:assembleDebugAndroidTest -PCOMICS_BASE_URL=
+```
+
+- Build/lint/instrumented assembly: **BUILD SUCCESSFUL in 28s**, 167 tasks
+  (14 executed, 153 up-to-date). Incremental build; no clean build is claimed.
+- JVM rerun: **BUILD SUCCESSFUL in 13s**, 70 tasks (2 executed, 68 up-to-date).
+  Both app/data test tasks actually executed: **40 tests, zero failures/errors/skips**
+  in result XML. Domain/component tests are NO-SOURCE, not additional passing tests.
+- Lint: zero errors/fatal findings; warnings app 23, data 2, component 5, unchanged totals.
+- Explicit instrumented Kotlin compilation rerun: **BUILD SUCCESSFUL in 19s**, 88 tasks
+  (1 executed, 87 up-to-date). **42 instrumented methods compiled, none executed**.
+  No emulator executable or /dev/kvm is available; device/TalkBack validation remains pending.
+- Current reproduction snippet executed successfully: all source/final hashes, formats,
+  dimensions and exact RGB pixel equality verified; other three resources unchanged.
+- Debug APK inspected: exactly six WebP covers, each matching its current resource SHA-256;
+  no duplicate PNGs or previous JPEGs packaged.
+- `git diff --check` passed. No Kotlin, Gradle, properties, CI, domain, repository,
+  ViewModel, navigation, image loader or UI code changed relative to the source HEAD.
+- Only the three PNG removals/three WebP additions, metrics, this report, licensing
+  provenance and README totals were changed. Build logs are under
+  `/tmp/comics-corrected-covers/` in this execution environment.
+
+No human/device visual acceptance, legal clearance or remote CI pass is asserted.
+The source commit already contains `kotlin.compiler.execution.strategy=in-process` in
+`gradle.properties`. This task neither adds nor modifies that property or the toolchain.
+
+---
+
+# Historical record — initial six-cover replacement
+
+All measurements, source references and discrepancy observations below apply to the
+initial artwork before this three-cover correction; they are retained as historical evidence.
+
 # Current cover replacement — 2026-10-30
 
 Branch: `feature/offline-comics-details`; source HEAD:
