@@ -100,7 +100,7 @@ class ComicNavigationTest {
         var backs = 0
         compose.setContent { Js_comicsTheme { ComicDetailsScreen(state, -1, { backs++ }, {}) } }
         compose.onNodeWithTag("details_unavailable").assertIsDisplayed()
-        compose.onNodeWithTag("details_back").assertHeightIsAtLeast(48.dp).performClick()
+        compose.onNodeWithTag("details_back").assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp).performClick()
         compose.runOnIdle { assertEquals(1, backs) }
     }
 
@@ -156,5 +156,6 @@ class ComicNavigationTest {
         }
         compose.onNodeWithTag("details_synopsis").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("details_back").assertIsDisplayed()
+            .assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
@@ -75,12 +76,34 @@ class ComicVisualLayoutTest {
 
     @Test fun detailToolbarHasPortugueseBackButtonAtTheStart() {
         compose.setContent { Js_comicsTheme { ComicDetailsScreen(ComicsUiState.Content(listOf(item), true), 1, {}, {}) } }
-        val back = compose.onNodeWithTag("details_back").assertHasClickAction().assertHeightIsAtLeast(48.dp)
+        val back = compose.onNodeWithTag("details_back").assertHasClickAction()
+            .assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
         compose.onNodeWithContentDescription(context.getString(R.string.back_to_catalog)).assertIsDisplayed()
         val button = back.getUnclippedBoundsInRoot()
         val bar = compose.onNodeWithTag("details_app_bar").getUnclippedBoundsInRoot()
         assertTrue(button.left + button.right < bar.left + bar.right)
         compose.onNodeWithText(context.getString(R.string.details_screen_title)).assertIsDisplayed()
+    }
+
+    @Test fun largeFontBackTargetAcceptsTouchOutsideTheVisualIcon() {
+        var backs = 0
+        compose.setContent {
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                Js_comicsTheme(useDarkTheme = true) {
+                    Box(Modifier.width(320.dp)) {
+                        ComicDetailsScreen(ComicsUiState.Content(listOf(item), true), 1, { backs++ }, {})
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("details_back").assertIsDisplayed().assertHasClickAction()
+            .assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
+            // The centered 24dp icon starts at x=12dp inside the 48dp target.
+            // This tap exercises the actual button hit area, not a semantic click.
+            .performTouchInput { click(Offset(3.dp.toPx(), 24.dp.toPx())) }
+        compose.runOnIdle { assertEquals(1, backs) }
+        compose.onNodeWithContentDescription(context.getString(R.string.back_to_catalog)).assertIsDisplayed()
     }
 
     @Test fun remoteLandscapeCoverAdoptsItsRatioAndStaysWithinDetailBounds() {

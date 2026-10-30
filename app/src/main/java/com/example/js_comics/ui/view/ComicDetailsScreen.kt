@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material.icons.Icons
@@ -45,8 +47,12 @@ fun ComicDetailsScreen(state: ComicsUiState, comicId: Int?, onBack: () -> Unit, 
                 modifier = Modifier.testTag("details_app_bar"),
                 title = { Text(stringResource(R.string.details_screen_title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    IconButton(onClick = onBack, modifier = Modifier.testTag("details_back")) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_to_catalog))
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).testTag("details_back"),
+                    ) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back_to_catalog),
+                            modifier = Modifier.size(24.dp))
                     }
                 },
             )
