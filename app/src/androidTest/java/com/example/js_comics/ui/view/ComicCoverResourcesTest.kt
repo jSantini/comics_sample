@@ -11,11 +11,8 @@ import org.junit.runner.RunWith
 class ComicCoverResourcesTest {
     @Test fun allSixMappedCoversDecodeAsBundledImages() {
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
-        val dimensions = mapOf(
-            "aurora" to (1024 to 1024), "cidade_papel" to (1400 to 1400),
-            "alem_orbita" to (565 to 800), "sentinela_neon" to (1024 to 1024),
-            "eclipse" to (1170 to 1790), "vigilante" to (512 to 640),
-        )
+        val dimensions = listOf("aurora", "cidade_papel", "alem_orbita", "sentinela_neon", "eclipse", "vigilante")
+            .associateWith { 1024 to 1536 }
         dimensions.forEach { (key, size) ->
             val bitmap = BitmapFactory.decodeResource(resources, localCoverResource(key)!!)
             assertNotNull("Bundled cover must decode: $key", bitmap)

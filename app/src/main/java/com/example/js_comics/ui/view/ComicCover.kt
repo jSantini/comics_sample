@@ -43,10 +43,7 @@ internal fun localCoverResource(key: String?): Int? = when (key) {
 
 /** Dimensions of the supplied assets; no bitmap/header decoding during composition. */
 internal fun localCoverAspectRatio(key: String?): Float? = when (key) {
-    "aurora", "cidade_papel", "sentinela_neon" -> 1f
-    "alem_orbita" -> 565f / 800f
-    "eclipse" -> 1170f / 1790f
-    "vigilante" -> 512f / 640f
+    "aurora", "cidade_papel", "alem_orbita", "sentinela_neon", "eclipse", "vigilante" -> 2f / 3f
     else -> null
 }
 

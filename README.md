@@ -39,7 +39,7 @@ three-line summary on the right. Titles and metadata can wrap as fonts grow. Det
 a compact top app bar with an accessible back icon, show title/metadata first and cap the
 cover height at 200dp before the full synopsis. Demo identification remains visible.
 
-`ComicCover.kt` maps domain-neutral keys to `drawable-nodpi/cover_*.jpg` only in `:app`.
+`ComicCover.kt` maps domain-neutral keys to `drawable-nodpi/cover_*.webp` only in `:app`.
 Bundled images take precedence over remote URLs; demo records have no URLs, so rendering
 never requires image downloads. Both resource IDs and remote URLs use Coil with IO fetch/decode
 dispatchers. Coil Compose resolves the finite cover constraints for sampled decoding rather
@@ -47,16 +47,18 @@ than requesting the original bitmap size; memory caching is retained. Unknown ke
 or an accessible placeholder. Known local image ratios come from presentation-only dimensions;
 remote ratios update from a successful Coil painter (2:3 is only the unknown-image fallback).
 `ContentScale.Fit` preserves the full artwork, titles and credits. Catalog covers fit within
-88dp × 132dp and detail covers within 280dp × 200dp, without forcing a portrait canvas onto
-square artwork. Card text can grow and details/status content scroll; back targets remain 48dp.
+88dp × 132dp and detail covers within 280dp × 200dp, with the full original aspect ratio preserved. Card text can grow and details/status content scroll; back targets remain 48dp.
 
-The supplied files had JPEG bytes under PNG extensions. Hardening reuses their original
-JPEG bytes with correct `.jpg` names instead of re-encoding the intermediate normalized PNGs.
-Decoded RGB pixels, dimensions, symbolic drawable names, artwork and embedded credits are
-unchanged. The six resources decreased from 10,459,473 normalized PNG bytes to 1,166,677 JPEG
-bytes (88.85%), without another lossy encoding. This is encoded-resource size, not a measured
-runtime/heap improvement. No replacement art was generated or downloaded.
-[Licensing remains unverified](docs/image-licensing.md).
+The current six covers were generated with AI specifically for the fictional catalog,
+as reported by the owner, and supplied as genuine 1024 × 1536 PNGs. All use 2:3 ratios.
+Lossless WebP preserves every decoded RGB pixel without cropping, resizing or removing
+credits: 16,558,056 source bytes become 12,537,854 bytes (24.28% reduction).
+This is encoded-resource size, not a measured runtime/heap improvement. Smaller lossy
+JPEG/WebP candidates were measured but not selected to preserve text and fine detail exactly.
+See [current metrics](docs/cover-assets-metrics.json) and
+[validation and historical record](docs/cover-hardening-validation.md).
+[Provenance and licensing limits](docs/image-licensing.md) remain separate from technical validation.
+Old images remain in Git history; replacing current resources does not erase that history.
 
 ## Stack
 

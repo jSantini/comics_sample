@@ -22,9 +22,8 @@ class ComicPresentationTest {
     }
 
     @Test fun suppliedCoverRatiosMatchOriginalDimensions() {
-        val expected = mapOf("aurora" to 1f, "cidade_papel" to 1f, "sentinela_neon" to 1f,
-            "alem_orbita" to (565f / 800f), "eclipse" to (1170f / 1790f), "vigilante" to (512f / 640f))
-        expected.forEach { (key, ratio) -> assertEquals(ratio, localCoverAspectRatio(key)!!, 0.0001f) }
+        val keys = listOf("aurora", "cidade_papel", "alem_orbita", "sentinela_neon", "eclipse", "vigilante")
+        keys.forEach { key -> assertEquals(1024f / 1536f, localCoverAspectRatio(key)!!, 0.0001f) }
         assertNull(localCoverAspectRatio(null))
         assertNull(localCoverAspectRatio("unknown"))
     }

@@ -37,10 +37,10 @@ class ComicVisualLayoutTest {
         issueNumber = 1, genre = "Ficção científica", series = "Aurora", publicationYear = 2026,
         synopsis = "Sinopse completa da história fictícia.", coverKey = "aurora")
 
-    @Test fun squareCatalogCoverHasSquareBoundsWithoutPortraitLetterboxing() {
+    @Test fun portraitCatalogCoverPreservesTwoToThreeBoundsWithoutCropping() {
         compose.setContent { Js_comicsTheme { ComicsListScreen(ComicsUiState.Content(listOf(item), true), {}) } }
         val bounds = compose.onNodeWithTag("comic_cover_1", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        assertEquals(bounds.right.value - bounds.left.value, bounds.bottom.value - bounds.top.value, 1f)
+        assertEquals((bounds.right.value - bounds.left.value) * 1.5f, bounds.bottom.value - bounds.top.value, 1f)
     }
 
     @Test fun largeTextCatalogKeepsSummaryToThreeLinesBesideCover() {

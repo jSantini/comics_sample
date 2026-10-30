@@ -1,3 +1,114 @@
+# Current cover replacement — 2026-10-30
+
+Branch: `feature/offline-comics-details`; source HEAD:
+`89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b`. No commit, push or history rewriting.
+
+## Resource decision and actual measurements
+
+Six genuine RGB PNG sources, each 1024 × 1536 (2:3), replaced the previous JPG artwork
+in the source commit. This change uses **lossless WebP**, supported by the existing
+minSdk 21 and Coil bitmap decoder. No crop, resize, pixel edit or credit removal.
+Every final decoded RGB buffer equals its corresponding source buffer byte-for-byte.
+No claim of human visual approval or device rendering validation is made.
+
+| Candidate | Total encoded bytes | Settings |
+| --- | ---: | --- |
+| Source PNG | 16,558,056 | Supplied bytes |
+| Optimized PNG | 15,823,283 | Pillow optimize=True |
+| JPEG | 5,712,083 | quality=95, subsampling=0, optimize=True, progressive=True |
+| Lossy WebP | 3,506,072 | quality=95, method=6 |
+| **Lossless WebP** | **12,537,854** | lossless=True, method=6 |
+
+Savings: 4,020,202 bytes (24.28%). Lossy candidates are substantially smaller but were
+rejected in favor of exact text/fine-detail preservation. This deliberately prioritizes
+quality over smallest APK. These totals are not heap, download or frame-time measurements.
+Pillow 12.3.0 / libwebp 1.6.0. Source and final hashes, dimensions and per-file candidate
+sizes are in [cover-assets-metrics.json](cover-assets-metrics.json); old metrics remain
+available in the parent Git history and the historical section below, not as current data.
+
+## Reproduction
+
+With Python and Pillow (same versions for identical encoded hashes), from repository root:
+
+```python
+import hashlib, io, json, subprocess
+from pathlib import Path
+from PIL import Image
+metrics = json.loads(Path("docs/cover-assets-metrics.json").read_text())
+for asset in metrics["assets"]:
+    raw = subprocess.check_output(["git", "show", metrics["base_commit"] + ":" + asset["source_path"]])
+    assert hashlib.sha256(raw).hexdigest() == asset["source_sha256"]
+    source = Image.open(io.BytesIO(raw)); source.load()
+    final_bytes = Path(asset["path"]).read_bytes()
+    assert len(final_bytes) == asset["bytes"]
+    assert hashlib.sha256(final_bytes).hexdigest() == asset["sha256"]
+    final = Image.open(io.BytesIO(final_bytes)); final.load()
+    assert source.format == "PNG" and final.format == "WEBP"
+    assert source.size == final.size == (asset["width"], asset["height"]) == (1024, 1536)
+    assert source.convert("RGB").tobytes() == final.convert("RGB").tobytes()
+    assert hashlib.sha256(final.convert("RGB").tobytes()).hexdigest() == asset["decoded_rgb_sha256"]
+    for name, settings in [
+        ("png_optimized", dict(format="PNG", optimize=True)),
+        ("jpeg_q95", dict(format="JPEG", quality=95, subsampling=0, optimize=True, progressive=True)),
+        ("webp_q95", dict(format="WEBP", quality=95, method=6)),
+        ("webp_lossless", dict(format="WEBP", lossless=True, method=6)),
+    ]:
+        buffer = io.BytesIO(); source.save(buffer, **settings)
+        assert len(buffer.getvalue()) == asset["candidate_bytes"][name]
+print("All six sources, final formats, dimensions, hashes, pixels and candidate sizes verified")
+```
+
+## Scope and remaining concerns
+
+Only presentation ratios and resource-dependent tests change; explicit resource mapping,
+Coil IO decoding/constraint sampling, HTTPS restrictions, fallback, navigation, accessible
+48dp back target, state/domain/repository logic and CI/toolchain remain intact.
+Updated JVM ratio checks, device decoding dimensions and catalog bounds assert the new
+2:3 resources; the existing off-main sampled-decoder test still uses the actual 1024px
+source width and requires a smaller result. No tests or security assertions were removed.
+
+Visual inspection of a source contact sheet revealed printed metadata differences:
+Sentinela says edition 4 (catalog 5), Eclipse says edition 5 (catalog volume 1), and
+Vigilante says edition 6 (catalog 1); some cover titles are abbreviated. Domain data and
+artwork were deliberately preserved. Owner review of these differences remains pending.
+See [image-licensing.md](image-licensing.md) for provenance and legal limitations.
+
+## Current execution results
+
+Using JDK 17 and the existing toolchain, with the remote endpoint empty:
+
+```bash
+./gradlew --no-daemon --max-workers=2 clean :app:assembleDebug \
+  testDebugUnitTest :domain:test :app:lintDebug :data:lintDebug :component:lintDebug \
+  :app:assembleDebugAndroidTest -PCOMICS_BASE_URL=
+```
+
+- **BUILD SUCCESSFUL in 1m28s**, 171 tasks: 163 executed, 8 up-to-date.
+- **40 JVM tests passed**, zero failures/errors/skips, from current-run XML. Domain and
+  component test tasks are NO-SOURCE, not additional passing tests.
+- Lint: zero errors/fatal findings; warnings app 23, data 2, component 5, matching the
+  previous validation totals.
+- **42 app instrumented methods compiled; none executed here**. No emulator executable,
+  system image or /dev/kvm is available. Device decoding, sampling and UI assertions
+  still require execution on the owner's emulator; successful compilation is not a pass.
+- The reproduction snippet above was executed successfully: all six sources/finals,
+  hashes, dimensions, exact RGB equality and all candidate encoded sizes verified.
+- Debug APK inspection found exactly six cover resources, all WebP, with hashes identical
+  to the final resource files. No previous JPG or duplicate PNG covers are packaged.
+- `git diff --check` passed. No source changes in domain/data/component, ViewModel,
+  navigation, Coil implementation, HTTPS client, CI, toolchain or accessibility target.
+
+Build log: `/tmp/comics-new-covers-validation.log` in this execution environment.
+No connected tests, TalkBack checks or human/device visual validation were performed.
+Historical results below are not evidence for these new resources.
+
+---
+
+# Historical record — superseded cover assets
+
+Everything below records the previous images/implementation at its stated base. Its file
+extensions, dimensions, hashes, ratios and test outcomes are historical, not current.
+
 # Cover performance and repository/navigation integration hardening
 
 Date: 2026-10-29. Branch: `modernization/phase-one`.
