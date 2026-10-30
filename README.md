@@ -21,6 +21,26 @@ story fixtures are fictional Portuguese text; the interface is in Portuguese; th
 
 There are no search, favorites, login, persistence or paging features.
 
+## Screenshots
+
+Real screenshots captured by the maintainer in the Android Studio emulator on Windows.
+The interface is in Portuguese; these captures show the offline demo and bundled covers.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/catalog-light.png" width="280" alt="Light theme offline catalog showing Aurora, Cidade de Papel and Além da Órbita"><br><b>Offline catalog · Light</b></td>
+    <td align="center"><img src="docs/screenshots/catalog-dark.png" width="280" alt="Dark theme offline catalog showing the same three comics"><br><b>Offline catalog · Dark</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/details-aurora.png" width="280" alt="Aurora detail screen in dark theme with metadata, cover and beginning of the synopsis"><br><b>Aurora details · Dark</b></td>
+    <td align="center"><img src="docs/screenshots/details-sentinela.png" width="280" alt="Sentinela Neon detail screen in light theme showing Memórias Roubadas and Edição 5"><br><b>Sentinela Neon details · Light</b></td>
+  </tr>
+</table>
+
+See the [Windows emulator capture guide](docs/screenshots/README.md) to reproduce these
+screens. Images retain their full 1080 × 1920 resolution; display widths only affect the
+gallery layout. These captures do not establish behavior on every device or accessibility setting.
+
 ## Offline catalog and covers
 
 All six fictional comics use the supplied Portuguese story text and publication year 2026:
@@ -254,7 +274,7 @@ page for the specific review commit; artifacts only exist after an actual run. L
 Compose tests were compiled, not executed. There are no release, signing, deployment
 or merge steps.
 
-## UI previews and screenshots
+## UI previews and manual checks
 
 Open `ComicsListPreviews.kt` in Android Studio for loading/content/empty/error previews
 and detail previews in light, dark and 2x-font configurations. All preview stories are fictional and have no
@@ -263,12 +283,9 @@ provide headings, a labeled progress indicator and recovery controls. Rendered c
 decorative next to their title; unavailable placeholders have a label.
 TalkBack, visual contrast, device rendering and accessibility still require manual review.
 
-| Real screenshot to capture | Status |
-| --- | --- |
-| Light theme, offline content | Not captured |
-| Dark theme, offline content | Not captured |
-| Comic detail, full synopsis | Not captured |
-| Large-font content and recovery states | Not captured |
+The four real emulator captures are shown in [Screenshots](#screenshots).
+Large-font and recovery-state visual/accessibility checks remain separate manual checks;
+the gallery is not evidence that every device or accessibility configuration was reviewed.
 
 No mock screenshots, fabricated imagery, CI badges or performance numbers are used.
 
