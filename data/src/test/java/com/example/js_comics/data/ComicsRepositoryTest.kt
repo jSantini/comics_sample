@@ -22,7 +22,7 @@ class ComicsRepositoryTest {
         val repository = DemoComicsRepository()
         val first = repository.getComics()
         assertEquals(CatalogSource.DEMO, first.source)
-        assertEquals(3, first.comics.size)
+        assertEquals(6, first.comics.size)
         assertTrue(first.comics.all { it.imageUrl == null })
         assertEquals(first, repository.getComics())
     }

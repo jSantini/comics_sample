@@ -1,0 +1,151 @@
+{
+  "base_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+  "baseline": "Corrected owner-supplied AI PNGs for sentinela_neon/eclipse/vigilante at source_commit; other three unchanged from original conversion. Each asset records its own source_commit.",
+  "method": "Pillow lossless WebP method=6; unchanged RGB pixels and dimensions; no crop or resizing.",
+  "pillow_version": "12.3.0",
+  "webp_version": "1.6.0",
+  "before_total_bytes": 15964404,
+  "after_total_bytes": 12165196,
+  "assets": [
+    {
+      "key": "alem_orbita",
+      "source_path": "app/src/main/res/drawable-nodpi/cover_alem_orbita.png",
+      "source_format": "PNG",
+      "source_bytes": 2862246,
+      "source_sha256": "596289c58bcc9d3f7041ac4185b42aef64e58f94aac65bde65bc6b44c4eff19e",
+      "path": "app/src/main/res/drawable-nodpi/cover_alem_orbita.webp",
+      "format": "WEBP",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2137570,
+      "sha256": "2890b8c3a12b3449348925f66c3a5eea043865fcfaec71689d8e44987f1afce8",
+      "decoded_rgb_sha256": "a4af1a8a0a31f5fb2e0500f8066bc567ed1217eef05a3dad0a55dc9ab9a5e708",
+      "pixel_equal": true,
+      "candidate_bytes": {
+        "png_optimized": 2717490,
+        "jpeg_q95": 1000136,
+        "webp_q95": 627048,
+        "webp_lossless": 2137570
+      },
+      "source_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b"
+    },
+    {
+      "key": "aurora",
+      "source_path": "app/src/main/res/drawable-nodpi/cover_aurora.png",
+      "source_format": "PNG",
+      "source_bytes": 2743566,
+      "source_sha256": "1125f52b1258a6c0e6112164fa4280faafac6a11c9913a47a66c5633f72a9173",
+      "path": "app/src/main/res/drawable-nodpi/cover_aurora.webp",
+      "format": "WEBP",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1948736,
+      "sha256": "ec2795ce35c43ea3b3012366cb40ce1a175c65b6a46142f568496f016049b46b",
+      "decoded_rgb_sha256": "5c0a4ba23bd2ec593bc02272d432539bb776213a3341d5e044fcfa80d66ee070",
+      "pixel_equal": true,
+      "candidate_bytes": {
+        "png_optimized": 2583003,
+        "jpeg_q95": 834249,
+        "webp_q95": 520264,
+        "webp_lossless": 1948736
+      },
+      "source_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b"
+    },
+    {
+      "key": "cidade_papel",
+      "source_path": "app/src/main/res/drawable-nodpi/cover_cidade_papel.png",
+      "source_format": "PNG",
+      "source_bytes": 2843218,
+      "source_sha256": "092dd9547ffa66ac414f71fa2b3c505f2b94f93c1765425cec6a12844cbacaa8",
+      "path": "app/src/main/res/drawable-nodpi/cover_cidade_papel.webp",
+      "format": "WEBP",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2165048,
+      "sha256": "9886f7ea1e1840519d8350355bdfd4a21474fdca65e9ac3486e154ce64c6acd6",
+      "decoded_rgb_sha256": "cce52910e751b612b988493024f229caf6866076e0fbff4daf4b75ed7930aa06",
+      "pixel_equal": true,
+      "candidate_bytes": {
+        "png_optimized": 2703074,
+        "jpeg_q95": 1004613,
+        "webp_q95": 625880,
+        "webp_lossless": 2165048
+      },
+      "source_commit": "89e88c6b2664a080bd2ab4f8f0c65dec1d8b532b"
+    },
+    {
+      "key": "eclipse",
+      "source_path": "app/src/main/res/drawable-nodpi/cover_eclipse.png",
+      "source_format": "PNG",
+      "source_bytes": 2490950,
+      "source_sha256": "80916782d315e356d15dbb56c28e84b812923f022b321c76fa678b1af213bbcc",
+      "path": "app/src/main/res/drawable-nodpi/cover_eclipse.webp",
+      "format": "WEBP",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1992770,
+      "sha256": "384affb1d121f803e63d5236c43aee28aaa034d9f9626cb7ed5e18f0411a95f2",
+      "decoded_rgb_sha256": "58a459ffebb44167fae5150e882783743a6539535446662a093b6b426560481f",
+      "pixel_equal": true,
+      "candidate_bytes": {
+        "webp_lossless": 1992770
+      },
+      "source_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+      "previous_webp": {
+        "commit": "bea9f0642038b3a73b84d8205ab2d4059b0528ce",
+        "bytes": 2184440,
+        "sha256": "8e0fecca598282bf58eb3b37b5f2962b8cccc30d0ae1e1399f229d48f3c5043b"
+      }
+    },
+    {
+      "key": "sentinela_neon",
+      "source_path": "app/src/main/res/drawable-nodpi/cover_sentinela_neon.png",
+      "source_format": "PNG",
+      "source_bytes": 2686962,
+      "source_sha256": "681797adde365363058cfa265be70c326935af30e86666eeae95c5e6c68752dc",
+      "path": "app/src/main/res/drawable-nodpi/cover_sentinela_neon.webp",
+      "format": "WEBP",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2100132,
+      "sha256": "a47fd8621b42b03187d48e26787499777b6221eda8c832d62f689c4f348b8132",
+      "decoded_rgb_sha256": "b0b8f8586d4d0d62ea3ee18120b3a49c7c7b711e55e07cda8defb19599347763",
+      "pixel_equal": true,
+      "candidate_bytes": {
+        "webp_lossless": 2100132
+      },
+      "source_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+      "previous_webp": {
+        "commit": "bea9f0642038b3a73b84d8205ab2d4059b0528ce",
+        "bytes": 2198152,
+        "sha256": "d5f944ed29ff61528be43e44c3b185cd5b260cda3553b48d5519b3265c828c1b"
+      }
+    },
+    {
+      "key": "vigilante",
+      "source_path": "app/src/main/res/drawable-nodpi/cover_vigilante.png",
+      "source_format": "PNG",
+      "source_bytes": 2337462,
+      "source_sha256": "4b55f2295fd2e4afd9a10197e77b85ebe5b877c0d204415020d0c1535b2e3edf",
+      "path": "app/src/main/res/drawable-nodpi/cover_vigilante.webp",
+      "format": "WEBP",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1820940,
+      "sha256": "79413b797713ffa67268cb32e0b7c3a69ce8eb349bbcd694f9b8589cecfe8167",
+      "decoded_rgb_sha256": "49e0a225db6b5a2668a7cd416402430db43b75fc8f4b0927758168216b58f674",
+      "pixel_equal": true,
+      "candidate_bytes": {
+        "webp_lossless": 1820940
+      },
+      "source_commit": "109a0e9e39f01ea486b138910e3e57d3e77002a9",
+      "previous_webp": {
+        "commit": "bea9f0642038b3a73b84d8205ab2d4059b0528ce",
+        "bytes": 1903908,
+        "sha256": "d2b3ebbaa8ec2aa430e8754b262a7e00bd620855d547d3a6098b4d83c62cd27e"
+      }
+    }
+  ],
+  "saved_bytes": 3799208,
+  "saved_percent": 23.797995
+}

@@ -78,6 +78,21 @@ class ComicsViewModelTest {
         assertTrue(cancelled)
         assertEquals(ComicsUiState.Loading, vm.state.value)
     }
+    @Test fun detailsLookupReusesLoadedCatalogWithoutAnotherRequest() = runTest {
+        val comic = Comic(1, "Fiction", "Full", null, series = "Series", issueNumber = 1,
+            genre = "Genre", publicationYear = 2026, shortSynopsis = "Short", coverKey = "aurora")
+        val repository = FakeRepository { ComicsCatalog(listOf(comic), CatalogSource.DEMO) }
+        val vm = ComicsViewModel(repository)
+        advanceUntilIdle()
+        val selected = vm.state.value.comicWithId(1)!!
+        assertEquals("Full", selected.synopsis)
+        assertEquals("Short", selected.shortSynopsis)
+        assertEquals("aurora", selected.coverKey)
+        assertEquals("Series", selected.series)
+        repeat(3) { vm.state.value.comicWithId(1) }
+        assertNull(vm.state.value.comicWithId(99))
+        assertEquals(1, repository.calls)
+    }
     @Test fun unexpectedFailureHasSafeUiState() = runTest {
         val vm = ComicsViewModel(FakeRepository { throw IllegalStateException("internal detail") })
         advanceUntilIdle()

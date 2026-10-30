@@ -14,6 +14,8 @@ class ComicsMappingTest {
         assertEquals(7, comic.id)
         assertEquals("Title", comic.title)
         assertEquals("Story", comic.description)
+        assertEquals("Story", comic.synopsis)
+        assertEquals("Story", comic.shortSynopsis)
         assertEquals("https://images.example.test/cover.jpg", comic.imageUrl)
     }
     @Test fun emptyCatalogIsValid() { assertTrue(response().toComics().isEmpty()) }
@@ -21,6 +23,14 @@ class ComicsMappingTest {
         val comic = response(ComicDto(1, "Title", "  ")).toComics().single()
         assertNull(comic.description)
         assertNull(comic.imageUrl)
+        assertNull(comic.series)
+        assertNull(comic.issueNumber)
+        assertNull(comic.volumeNumber)
+        assertNull(comic.genre)
+        assertNull(comic.publicationYear)
+        assertNull(comic.coverKey)
+        assertNull(comic.synopsis)
+        assertNull(comic.shortSynopsis)
     }
     @Test fun rejectsMissingEnvelopeAndRequiredFields() {
         val invalid = listOf(ComicsResponseDto(), ComicsResponseDto(ComicsDataDto()), response(null), response(ComicDto(null, "Title")), response(ComicDto(1, " ")), response(ComicDto(0, "Title")))
