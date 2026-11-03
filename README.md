@@ -5,8 +5,9 @@ security boundaries and reproducible validation in senior engineering interviews
 It is a reviewable engineering exercise, not a production-readiness claim.
 
 The app starts with an **offline demo** containing six fictional comics and bundled cover
-images. Select Online to load the same catalog from Railway. Both modes use local artwork
-and require no credentials or Marvel calls. The existing
+images. Select Online to load nine comics from Railway, including three API-exclusive
+stories at the top with remote covers. The six shared comics retain their bundled artwork.
+Neither mode requires credentials or Marvel calls. The existing
 story fixtures are fictional Portuguese text; the interface is in Portuguese; this project guide is in English.
 
 ## What the app demonstrates
@@ -26,7 +27,8 @@ There are no search, favorites, login, persistence or paging features.
 
 Real screenshots captured by the maintainer in the Android Studio emulator on Windows.
 The interface is in Portuguese. The four original captures below show the Offline demo;
-the two newer comparison captures show Offline and Online with the same bundled covers.
+the two final comparison captures show the six-item Offline catalog and the nine-item
+Online catalog, including API-exclusive stories with remote covers.
 
 <table>
   <tr>
@@ -46,14 +48,16 @@ gallery layout. These captures do not establish behavior on every device or acce
 ### Offline vs. Online
 
 Both captures were taken on the same Android emulator at 1080 × 1920.
-**Offline** uses the bundled fictional catalog without a backend request;
-**Online** loads the same catalog from the public Railway API. Both modes
-intentionally use the same six bundled WebP covers.
+**Offline** uses six bundled fictional comics and local WebP covers, without a backend
+request. **Online** loads nine comics from the public Railway API: three exclusive
+stories appear first with remote covers, followed by the six shared comics with bundled
+WebP artwork. The exclusive stories are Protocolo Ômega: Última Transmissão,
+Distrito Neon: Código Fantasma and O Reino das Cinzas: Herdeira do Fogo.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/catalog-offline.png" width="280" alt="Offline selected, demonstration banner and comic catalog using bundled data"><br><b>Offline · Bundled catalog</b></td>
-    <td align="center"><img src="docs/screenshots/catalog-online.png" width="280" alt="Online selected, remote catalog banner and comics loaded from Railway"><br><b>Online · Railway API</b></td>
+    <td align="center"><img src="docs/screenshots/catalog-offline.png" width="280" alt="Offline selected, demonstration banner and six-comic bundled catalog"><br><b>Offline · Bundled catalog</b></td>
+    <td align="center"><img src="docs/screenshots/catalog-online.png" width="280" alt="Online selected, remote catalog banner and three API-exclusive stories at the top of the nine-comic Railway catalog"><br><b>Online · Railway API</b></td>
   </tr>
 </table>
 
@@ -161,7 +165,8 @@ SDK (or use an ignored local.properties). Check the JVM shown by the wrapper:
 
 `installDebug` requires a running emulator or authorized device (`adb devices`). Launch
 **Comics** after installation. It starts in **Offline**, with six bundled stories/covers.
-Tap **Online** to use the public Railway catalog; no extra configuration is needed.
+Tap **Online** to load nine comics from Railway, including three exclusive stories at
+the top with remote covers; no extra configuration is needed.
 The four original README screenshots retain their Offline provenance; the comparison
 section also includes a newer Online capture.
 
@@ -238,8 +243,10 @@ Room/DataStore/Paging and extra feature modules are deliberately absent.
 ## Offline and Online catalog
 
 The app starts in **Offline**, using `DemoComicsRepository` without a network request.
-Select **Online** on the catalog to load `RemoteComicsRepository` from the deployed
-[Railway API](https://comics-showcase-api-production.up.railway.app/api/comics).
+Select **Online** to load nine comics through `RemoteComicsRepository` from the deployed
+[Railway API](https://comics-showcase-api-production.up.railway.app/api/comics). Three
+API-exclusive stories appear first with remote covers; the six embedded stories follow
+and retain their matching bundled WebP artwork.
 Backend source: [jSantini/comics-showcase-api](https://github.com/jSantini/comics-showcase-api).
 
 The public default `COMICS_BASE_URL` is
@@ -271,12 +278,16 @@ present, must be positive. Missing synopses fall back to description; missing me
 stays null. DTO, domain and UI models remain separate. Invalid JSON, missing required
 fields and duplicate IDs become recoverable errors.
 
-The checked-in `data/src/test/resources/railway-comics.json` was captured from production
-on 2026-11-03. It contains IDs 1–6, issues 1/3/2/5 for IDs 1–4, **volume 1** for ID 5,
-and issue 1 for ID 6. All metadata and story text match the embedded catalog. The API
-supplies cover keys rather than image URLs: the six matching bundled WebP files are
-used in both modes. Unknown keys use the existing safe image/placeholder path. Legacy
-optional `thumbnail: {path, extension}` remains supported with HTTPS validation.
+The checked-in `data/src/test/resources/railway-comics.json` is the earlier six-item
+production snapshot captured on 2026-11-03 and retained for deterministic tests. It
+contains IDs 1–6, issues 1/3/2/5 for IDs 1–4, **volume 1** for ID 5, and issue 1 for
+ID 6. Its metadata and story text match the embedded catalog; it is not a snapshot of
+the current nine-item live catalog.
+
+The live API now returns exclusive IDs 7, 8 and 9 first, followed by the six shared
+comics. The shared entries supply cover keys for the local WebPs. The exclusive entries
+omit coverKey and provide HTTPS `thumbnail: {path, extension}` values for remote covers.
+Unknown/invalid covers retain the existing secure image/placeholder fallback.
 
 Automated network tests use MockWebServer and this local fixture; CI does not contact
 Railway. Online use requires connectivity and backend availability. The four original screenshots
