@@ -25,7 +25,8 @@ There are no search, favorites, login, persistence or paging features.
 ## Screenshots
 
 Real screenshots captured by the maintainer in the Android Studio emulator on Windows.
-The interface is in Portuguese; these captures show the offline demo and bundled covers.
+The interface is in Portuguese. The four original captures below show the Offline demo;
+the two newer comparison captures show Offline and Online with the same bundled covers.
 
 <table>
   <tr>
@@ -41,6 +42,24 @@ The interface is in Portuguese; these captures show the offline demo and bundled
 See the [Windows emulator capture guide](docs/screenshots/README.md) to reproduce these
 screens. Images retain their full 1080 × 1920 resolution; display widths only affect the
 gallery layout. These captures do not establish behavior on every device or accessibility setting.
+
+### Offline vs. Online
+
+Both captures were taken on the same Android emulator at 1080 × 1920.
+**Offline** uses the bundled fictional catalog without a backend request;
+**Online** loads the same catalog from the public Railway API. Both modes
+intentionally use the same six bundled WebP covers.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/catalog-offline.png" width="280" alt="Offline selected, demonstration banner and comic catalog using bundled data"><br><b>Offline · Bundled catalog</b></td>
+    <td align="center"><img src="docs/screenshots/catalog-online.png" width="280" alt="Online selected, remote catalog banner and comics loaded from Railway"><br><b>Online · Railway API</b></td>
+  </tr>
+</table>
+
+These screenshots show the selected source and rendered catalog; they do not
+by themselves prove network transport. The remote integration is covered by
+the implementation and tests.
 
 ## Offline catalog and covers
 
@@ -143,7 +162,8 @@ SDK (or use an ignored local.properties). Check the JVM shown by the wrapper:
 `installDebug` requires a running emulator or authorized device (`adb devices`). Launch
 **Comics** after installation. It starts in **Offline**, with six bundled stories/covers.
 Tap **Online** to use the public Railway catalog; no extra configuration is needed.
-Existing README screenshots retain their original Offline provenance.
+The four original README screenshots retain their Offline provenance; the comparison
+section also includes a newer Online capture.
 
 For a build with no configured backend, append `-PCOMICS_BASE_URL=` to the assemble/install
 command on either platform. Offline stays functional; selecting Online then shows a
@@ -259,8 +279,8 @@ used in both modes. Unknown keys use the existing safe image/placeholder path. L
 optional `thumbnail: {path, extension}` remains supported with HTTPS validation.
 
 Automated network tests use MockWebServer and this local fixture; CI does not contact
-Railway. Online use requires connectivity and backend availability. Existing screenshots
-remain offline captures and do not demonstrate the Online selector.
+Railway. Online use requires connectivity and backend availability. The four original screenshots
+remain Offline captures; the newer comparison pair shows both source selections.
 
 ### URL and image security boundaries
 
@@ -295,7 +315,7 @@ Subsequent GitHub [run 41658203476](https://github.com/jSantini/comics_sample/ac
 for `d2027b0` completed successfully in both jobs; official logs confirm 43 instrumented
 tests and a successful connected-test task. Separately, the owner reports 43 instrumented
 tests passed on Windows and visually checked the live Online catalog. Those Windows/visual
-checks were not rerun in the final review. Screenshots remain offline captures.
+checks were not rerun in the final review. The original four screenshots remain Offline captures; the new comparison pair includes Online.
 
 See the [final integration review](docs/final-integration-review.md) for the evidence matrix
 and two-stage PR plan, and the [sanitized security audit](docs/security-history-audit.md)
@@ -373,7 +393,8 @@ provide headings, a labeled progress indicator and recovery controls. Rendered c
 decorative next to their title; unavailable placeholders have a label.
 TalkBack, visual contrast, device rendering and accessibility still require manual review.
 
-The four real emulator captures are shown in [Screenshots](#screenshots).
+The six real emulator captures are shown in [Screenshots](#screenshots), including the
+[Offline vs. Online comparison](#offline-vs-online).
 Large-font and recovery-state visual/accessibility checks remain separate manual checks;
 the gallery is not evidence that every device or accessibility configuration was reviewed.
 
