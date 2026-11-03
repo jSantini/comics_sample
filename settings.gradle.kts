@@ -25,3 +25,5 @@ rootProject.name = "js_comics"
 include(":app")
 include(":data")
 include(":component")
+
+include(":domain")

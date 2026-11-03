@@ -1,15 +1,42 @@
+
+# ==============================
+# Android Studio / IntelliJ IDEA
+# ==============================
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
+/.idea/caches/
+/.idea/libraries/
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+/.idea/tasks.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/AndroidProjectSystem.xml
+/.idea/gradle.xml
+/.idea/misc.xml
+/.idea/runConfigurations.xml
+/.idea/shelf/
+
+# ==============================
+# Gradle / Build
+# ==============================
+.gradle/
+**/build/
+
+# ==============================
+# Local environment
+# ==============================
 local.properties
+
+# ==============================
+# Android / Native build
+# ==============================
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# ==============================
+# Operating systems
+# ==============================
+.DS_Store
+Thumbs.db

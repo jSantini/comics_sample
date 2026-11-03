@@ -85,6 +85,7 @@ fun Js_comicsTheme(
 
   MaterialTheme(
     colorScheme = colors,
+    shapes = ComicsShapes,
     content = content
   )
 }
