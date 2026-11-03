@@ -18,7 +18,35 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ComicItem(val id: Int, val title: String, val description: String?, val imageUrl: String?)
+data class ComicItem(
+    val id: Int,
+    val title: String,
+    val description: String?,
+    val imageUrl: String?,
+    val series: String? = null,
+    val issueNumber: Int? = null,
+    val volumeNumber: Int? = null,
+    val genre: String? = null,
+    val publicationYear: Int? = null,
+    val shortSynopsis: String? = description,
+    val synopsis: String? = description,
+    val coverKey: String? = null,
+)
+
+internal fun com.example.js_comics.domain.Comic.toComicItem() = ComicItem(
+    id = id,
+    title = title,
+    description = description,
+    imageUrl = imageUrl,
+    series = series,
+    issueNumber = issueNumber,
+    volumeNumber = volumeNumber,
+    genre = genre,
+    publicationYear = publicationYear,
+    shortSynopsis = shortSynopsis,
+    synopsis = synopsis,
+    coverKey = coverKey,
+)
 sealed interface ComicsUiState {
     data object Loading : ComicsUiState
     data class Content(val items: List<ComicItem>, val isDemo: Boolean) : ComicsUiState
@@ -27,7 +55,22 @@ sealed interface ComicsUiState {
 }
 
 @HiltViewModel
-class ComicsViewModel @Inject constructor(private val repository: ComicsRepository) : ViewModel() {
+class ComicsViewModel @Inject constructor(
+    private val repository: ComicsRepository,
+    @com.example.js_comics.data.di.OnlineCatalog private val onlineRepository: ComicsRepository = repository,
+) : ViewModel() {
+    private val mutableSource = MutableStateFlow(CatalogSource.DEMO)
+    val source: StateFlow<CatalogSource> = mutableSource.asStateFlow()
+
+    @MainThread
+    fun selectSource(source: CatalogSource) {
+        if (source == mutableSource.value) return
+        loadJob?.cancel()
+        loadJob = null
+        mutableSource.value = source
+        mutableState.value = ComicsUiState.Loading
+        retry()
+    }
     private val mutableState = MutableStateFlow<ComicsUiState>(ComicsUiState.Loading)
     val state: StateFlow<ComicsUiState> = mutableState.asStateFlow()
     private var loadJob: Job? = null
@@ -38,14 +81,15 @@ class ComicsViewModel @Inject constructor(private val repository: ComicsReposito
     @MainThread
     fun retry() {
         if (loadJob?.isActive == true) return
+        val selectedRepository = if (source.value == CatalogSource.DEMO) repository else onlineRepository
         loadJob = viewModelScope.launch {
             mutableState.value = ComicsUiState.Loading
             try {
-                val catalog = repository.getComics()
+                val catalog = selectedRepository.getComics()
                 currentCoroutineContext().ensureActive()
                 val isDemo = catalog.source == CatalogSource.DEMO
                 mutableState.value = if (catalog.comics.isEmpty()) ComicsUiState.Empty(isDemo) else {
-                    ComicsUiState.Content(catalog.comics.map { ComicItem(it.id, it.title, it.description, it.imageUrl) }, isDemo)
+                    ComicsUiState.Content(catalog.comics.map { it.toComicItem() }, isDemo)
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled

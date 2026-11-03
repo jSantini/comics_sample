@@ -1,6 +1,6 @@
 package com.example.js_comics.ui.view
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.FilterChip
+import com.example.js_comics.domain.CatalogSource
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,20 +30,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
-import coil.compose.SubcomposeAsyncImage
 import com.example.component.LoadingBar
 import com.example.js_comics.R
 import com.example.js_comics.domain.ComicsFailure
@@ -61,58 +60,76 @@ object ComicsScreenTags {
 @Composable
 fun ComicsRoute(viewModel: ComicsViewModel = composeViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    ComicsListScreen(state, viewModel::retry)
+    val source by viewModel.source.collectAsStateWithLifecycle()
+    ComicsCatalogNavigation(state, viewModel::retry, source = source, onSourceSelected = viewModel::selectSource)
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun ComicsListScreen(state: ComicsUiState, onRetry: () -> Unit) {
+fun ComicsListScreen(state: ComicsUiState, onRetry: () -> Unit, onComicClick: (Int) -> Unit = {},
+    source: CatalogSource? = null, onSourceSelected: (CatalogSource) -> Unit = {}) {
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        when (state) {
-            ComicsUiState.Loading -> Box(Modifier.testTag(ComicsScreenTags.LOADING)) { LoadingBar() }
-            is ComicsUiState.Content -> LazyColumn(
-                modifier = Modifier.fillMaxSize().testTag(ComicsScreenTags.CONTENT),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                item(key = "source") { SourceLabel(state.isDemo) }
-                item(key = "heading") {
-                    Text(
-                        stringResource(R.string.catalog_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().semantics { heading() },
-                    )
+        Column(Modifier.fillMaxSize()) {
+            if (source != null) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FilterChip(selected = source == CatalogSource.DEMO, onClick = { onSourceSelected(CatalogSource.DEMO) },
+                        label = { Text(stringResource(R.string.mode_offline)) })
+                    FilterChip(selected = source == CatalogSource.REMOTE, onClick = { onSourceSelected(CatalogSource.REMOTE) },
+                        label = { Text(stringResource(R.string.mode_online)) })
                 }
-                items(state.items, key = { it.id }) { ComicCard(it) }
+                if (state is ComicsUiState.Error || state == ComicsUiState.Loading) {
+                    SourceLabel(source == CatalogSource.DEMO, Modifier.padding(horizontal = 20.dp), compact = true)
+                }
             }
-            is ComicsUiState.Empty -> Column(Modifier.fillMaxSize().testTag(ComicsScreenTags.EMPTY)) {
-                SourceLabel(state.isDemo, Modifier.padding(horizontal = 20.dp, vertical = 16.dp))
-                StatusContent(stringResource(R.string.empty_title), stringResource(R.string.empty_catalog), onRetry)
-            }
-            is ComicsUiState.Error -> Box(Modifier.testTag(ComicsScreenTags.ERROR)) {
-                StatusContent(stringResource(R.string.error_title), stringResource(state.failure.messageResource()), onRetry)
+            Box(Modifier.weight(1f)) {
+                when (state) {
+                    ComicsUiState.Loading -> Box(Modifier.testTag(ComicsScreenTags.LOADING)) { LoadingBar() }
+                    is ComicsUiState.Content -> LazyColumn(
+                        modifier = Modifier.fillMaxSize().testTag(ComicsScreenTags.CONTENT),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        item(key = "source") { SourceLabel(state.isDemo) }
+                        item(key = "heading") {
+                            Text(
+                                stringResource(R.string.catalog_title),
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().semantics { heading() },
+                            )
+                        }
+                        items(state.items, key = { it.id }) { ComicCard(it, onComicClick) }
+                    }
+                    is ComicsUiState.Empty -> Column(Modifier.fillMaxSize().testTag(ComicsScreenTags.EMPTY)) {
+                        SourceLabel(state.isDemo, Modifier.padding(horizontal = 20.dp, vertical = 16.dp))
+                        StatusContent(stringResource(R.string.empty_title), stringResource(R.string.empty_catalog), onRetry)
+                    }
+                    is ComicsUiState.Error -> Box(Modifier.testTag(ComicsScreenTags.ERROR)) {
+                        StatusContent(stringResource(R.string.error_title), stringResource(state.failure.messageResource()), onRetry)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SourceLabel(isDemo: Boolean, modifier: Modifier = Modifier) {
+internal fun SourceLabel(isDemo: Boolean, modifier: Modifier = Modifier, compact: Boolean = false) {
     Surface(
         modifier.widthIn(max = 720.dp).fillMaxWidth().testTag(if (isDemo) ComicsScreenTags.DEMO else ComicsScreenTags.REMOTE),
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = if (compact) 8.dp else 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(if (isDemo) R.string.demo_catalog else R.string.remote_catalog), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(if (isDemo) R.string.demo_description else R.string.remote_description), style = MaterialTheme.typography.bodyMedium)
+            if (!compact) Text(stringResource(if (isDemo) R.string.demo_description else R.string.remote_description), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-private fun StatusContent(title: String, message: String, onRetry: () -> Unit) {
+internal fun StatusContent(title: String, message: String, onRetry: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -132,46 +149,42 @@ private fun StatusContent(title: String, message: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun ComicCard(item: ComicItem) {
+private fun ComicCard(item: ComicItem, onComicClick: (Int) -> Unit) {
+    val clickLabel = stringResource(R.string.open_details, item.title)
     Card(
-        modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().semantics(mergeDescendants = true) {},
+        modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().testTag("comic_card_${item.id}")
+            .clickable(role = Role.Button, onClickLabel = clickLabel) { onComicClick(item.id) },
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (item.imageUrl != null) {
-                    SubcomposeAsyncImage(
-                        model = item.imageUrl,
-                        contentDescription = null, // Decorative: the title carries the accessible meaning.
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.width(72.dp).height(96.dp).clip(MaterialTheme.shapes.medium),
-                        loading = { CoverPlaceholder() },
-                        error = { CoverPlaceholder() },
-                    )
-                } else CoverPlaceholder()
-                Text(item.title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.width(88.dp), contentAlignment = Alignment.TopCenter) {
+                ComicCover(item, Modifier.widthIn(max = 88.dp).heightIn(max = 132.dp))
             }
-            item.description?.let {
-                Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(item.title, style = MaterialTheme.typography.titleMedium)
+                item.genre?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary) }
+                IssueOrVolume(item)
+                item.shortSynopsis?.let {
+                    Text(it, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 3, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.testTag("comic_summary_${item.id}"))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun CoverPlaceholder() {
-    Box(
-        Modifier.width(72.dp).height(96.dp).clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer).clearAndSetSemantics {},
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(stringResource(R.string.cover_monogram), style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onPrimaryContainer)
-    }
+internal fun IssueOrVolume(item: ComicItem) {
+    item.issueNumber?.let { Text(stringResource(R.string.comic_issue, it), style = MaterialTheme.typography.labelLarge) }
+    item.volumeNumber?.let { Text(stringResource(R.string.comic_volume, it), style = MaterialTheme.typography.labelLarge) }
 }
 
-private fun ComicsFailure.messageResource(): Int = when (this) {
+internal fun ComicsFailure.messageResource(): Int = when (this) {
     ComicsFailure.NETWORK -> R.string.error_network
     ComicsFailure.TIMEOUT -> R.string.error_timeout
     ComicsFailure.HTTP -> R.string.error_http

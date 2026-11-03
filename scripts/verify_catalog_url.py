@@ -14,7 +14,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "data/build/generated/source/buildConfig/debug/com/example/js_comics/data/BuildConfig.java"
 VALID = [
-    "",  # Public default: offline demo.
+    "",  # Explicit offline-only configuration.
+    "https://comics-showcase-api-production.up.railway.app/api/",
     "https://catalog.example.invalid/api/",
     "https://catalog.example.invalid:8443/api/",
     "https://catalog.example.invalid/a$b/O'Reilly/a+b;c&d=/",

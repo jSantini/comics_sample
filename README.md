@@ -4,13 +4,15 @@ A deliberately small Android sample for discussing architecture, concurrency, UI
 security boundaries and reproducible validation in senior engineering interviews.
 It is a reviewable engineering exercise, not a production-readiness claim.
 
-The default app is an **offline demo** containing three fictional stories and local cover
-placeholders. It does not call Marvel, require credentials, or download images. The existing
-story fixtures are fictional Portuguese text; the interface and project guide are in English.
+The app starts with an **offline demo** containing six fictional comics and bundled cover
+images. Select Online to load the same catalog from Railway. Both modes use local artwork
+and require no credentials or Marvel calls. The existing
+story fixtures are fictional Portuguese text; the interface is in Portuguese; this project guide is in English.
 
 ## What the app demonstrates
 
-- A single Compose catalog with loading, content, empty and recoverable error states.
+- A Compose catalog with six local covers, metadata, loading, content, empty and recoverable error states.
+- Clickable cards, ID-based detail navigation, full synopses and working back navigation.
 - Explicit demo identification and retry without overlapping requests.
 - Material 3 light/dark themes, scrollable status screens and content-driven card heights.
 - Lifecycle-aware state collection, read-only StateFlow and cancellation-safe loading.
@@ -18,7 +20,69 @@ story fixtures are fictional Portuguese text; the interface and project guide ar
 - Optional HTTPS catalog integration and a separate restricted image transport.
 - Behavioral JVM tests, isolated Compose tests and a GitHub Actions workflow.
 
-There are no details, search, favorites, login, persistence, paging or navigation features.
+There are no search, favorites, login, persistence or paging features.
+
+## Screenshots
+
+Real screenshots captured by the maintainer in the Android Studio emulator on Windows.
+The interface is in Portuguese; these captures show the offline demo and bundled covers.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/catalog-light.png" width="280" alt="Light theme offline catalog showing Aurora, Cidade de Papel and Além da Órbita"><br><b>Offline catalog · Light</b></td>
+    <td align="center"><img src="docs/screenshots/catalog-dark.png" width="280" alt="Dark theme offline catalog showing the same three comics"><br><b>Offline catalog · Dark</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/details-aurora.png" width="280" alt="Aurora detail screen in dark theme with metadata, cover and beginning of the synopsis"><br><b>Aurora details · Dark</b></td>
+    <td align="center"><img src="docs/screenshots/details-sentinela.png" width="280" alt="Sentinela Neon detail screen in light theme showing Memórias Roubadas and Edição 5"><br><b>Sentinela Neon details · Light</b></td>
+  </tr>
+</table>
+
+See the [Windows emulator capture guide](docs/screenshots/README.md) to reproduce these
+screens. Images retain their full 1080 × 1920 resolution; display widths only affect the
+gallery layout. These captures do not establish behavior on every device or accessibility setting.
+
+## Offline catalog and covers
+
+All six fictional comics use the supplied Portuguese story text and publication year 2026:
+
+| ID | Title | Edition | Local cover key |
+| --- | --- | --- | --- |
+| 1 | Aurora: O Primeiro Sinal | Issue 1 | `aurora` |
+| 2 | Cidade de Papel: O Arquiteto Invisível | Issue 3 | `cidade_papel` |
+| 3 | Além da Órbita: Retorno a Casa | Issue 2 | `alem_orbita` |
+| 4 | Sentinela Neon: Memórias Roubadas | Issue 5 | `sentinela_neon` |
+| 5 | Crônicas do Eclipse: O Último Guardião | Volume 1; no issue supplied | `eclipse` |
+| 6 | O Vigilante das Sombras: Caso Zero | Issue 1 | `vigilante` |
+
+Compact catalog cards place the cover on the left and title, genre, edition and a maximum
+three-line summary on the right. Titles and metadata can wrap as fonts grow. Details use
+a compact top app bar with an accessible back icon, show title/metadata first and cap the
+cover height at 200dp before the full synopsis. Demo identification remains visible.
+
+`ComicCover.kt` maps domain-neutral keys to `drawable-nodpi/cover_*.webp` only in `:app`.
+Bundled images take precedence over remote URLs; demo records have no URLs, so rendering
+never requires image downloads. Both resource IDs and remote URLs use Coil with IO fetch/decode
+dispatchers. Coil Compose resolves the finite cover constraints for sampled decoding rather
+than requesting the original bitmap size; memory caching is retained. Unknown keys fall back to the secure remote image loader
+or an accessible placeholder. Known local image ratios come from presentation-only dimensions;
+remote ratios update from a successful Coil painter (2:3 is only the unknown-image fallback).
+`ContentScale.Fit` preserves the full artwork, titles and credits. Catalog covers fit within
+88dp × 132dp and detail covers within 280dp × 200dp, with the full original aspect ratio preserved. Card text can grow and details/status content scroll; back targets remain 48dp.
+
+The current six covers were generated with AI specifically for the fictional catalog,
+as reported by the owner, and supplied as genuine 1024 × 1536 PNGs. All use 2:3 ratios.
+Lossless WebP preserves every decoded RGB pixel without cropping, resizing or removing
+credits: 15,964,404 source bytes become 12,165,196 bytes (23.80% reduction).
+The corrected Sentinela, Eclipse and Vigilante covers now match the catalog titles and
+edition/volume labels; the other three resource files are unchanged.
+This is encoded-resource size, not a measured runtime/heap improvement. The historical
+six-cover comparison measured smaller lossy JPEG/WebP candidates; those measurements do
+not describe the three corrected sources. Lossless conversion preserves text and detail exactly.
+See [current metrics](docs/cover-assets-metrics.json) and
+[validation and historical record](docs/cover-hardening-validation.md).
+[Provenance and licensing limits](docs/image-licensing.md) remain separate from technical validation.
+Old images remain in Git history; replacing current resources does not erase that history.
 
 ## Stack
 
@@ -26,7 +90,7 @@ There are no details, search, favorites, login, persistence, paging or navigatio
 | --- | --- |
 | Language / build | Kotlin 1.9.0, Gradle 8.2, Android Gradle Plugin 8.2.2, JDK 17 |
 | Android | minSdk 21, compileSdk/targetSdk 34, Build Tools 34.0.0 |
-| UI | Jetpack Compose BOM 2023.08.00, compiler 1.5.1, Material 3 |
+| UI | Jetpack Compose BOM 2023.08.00, compiler 1.5.1, Material 3, Navigation Compose 2.7.7 |
 | State / concurrency | ViewModel, StateFlow, Coroutines 1.7.3, lifecycle-compose 2.7.0 |
 | Dependency injection | Hilt 2.50 with kapt |
 | HTTP / images | Retrofit 2.9.0, Gson 2.10.1, OkHttp 4.12.0, Coil 2.5.0 |
@@ -56,7 +120,9 @@ Run only one build/URL verification process at a time in a checkout.
 ```mermaid
 flowchart LR
     Route[Compose route] --> VM[ViewModel / read-only StateFlow]
-    Route --> Screen[Stateless ComicsListScreen]
+    Route --> Nav[Navigation Compose / stable comic ID]
+    Nav --> Screen[Stateless ComicsListScreen]
+    Nav --> Details[ComicDetailsScreen / shared catalog lookup]
     VM --> Contract[domain: ComicsRepository]
     Demo[data: DemoComicsRepository] -. implements .-> Contract
     Remote[data: RemoteComicsRepository] -. implements .-> Contract
@@ -80,40 +146,62 @@ Flow adds no rule here, so neither is introduced. The ViewModel owns UI state, p
 cancellation and ignores another load while its current job is active. Completed/failed
 loads can be retried. This is MVVM with unidirectional data flow, without an MVI framework.
 
-Room/DataStore/Paging/Navigation and extra feature modules are deliberately absent.
+Navigation Compose 2.7.7 stays in `:app`, with a catalog destination and `comic/{comicId}`.
+Only the numeric ID crosses destinations. An activity-scoped ViewModel provides the already
+loaded catalog; opening/backing out of details makes no additional repository request.
+The NavController restores the destination/ID after recreation; the ViewModel survives
+configuration changes. After process death the catalog reloads once through normal startup,
+then resolves the restored ID. Missing/malformed/unavailable IDs have a safe return path;
+loading/error states remain explicit. There is no persistent cache for remote data.
 
-## Optional remote catalog
+Room/DataStore/Paging and extra feature modules are deliberately absent.
 
-The default remains offline. A separate, trusted **public HTTPS gateway** can be enabled
-with a non-secret build property:
+## Offline and Online catalog
+
+The app starts in **Offline**, using `DemoComicsRepository` without a network request.
+Select **Online** on the catalog to load `RemoteComicsRepository` from the deployed
+[Railway API](https://comics-showcase-api-production.up.railway.app/api/comics).
+Backend source: [jSantini/comics-showcase-api](https://github.com/jSantini/comics-showcase-api).
+
+The public default `COMICS_BASE_URL` is
+`https://comics-showcase-api-production.up.railway.app/api/`. Build and install:
 
 ```bash
-./gradlew :app:assembleDebug -PCOMICS_BASE_URL=https://catalog.example.invalid/api/
+./gradlew :app:installDebug
+# Then tap Online in the catalog.
+# Explicit production configuration:
+./gradlew :app:installDebug -PCOMICS_BASE_URL=https://comics-showcase-api-production.up.railway.app/api/
+# Offline-only build, with no configured backend:
+./gradlew :app:installDebug -PCOMICS_BASE_URL=
 ```
 
-That address is a non-operational example. The app calls `GET /api/comics`, depending on
-the supplied prefix. No backend is implemented here and the app does not sign Marvel
-requests. Provider credentials and signatures belong exclusively on a separately managed
-server. This contract is not a private/authenticated user catalog.
+With an empty URL, Offline remains fully functional; Online shows a recoverable network
+error. There is no silent fallback, persistent cache or automatic retry. Retry reloads the
+selected source. Switching sources cancels the previous load and immediately clears its
+items; cancellation is checked before publishing results or failures. A source indicator
+is visible during loading, content, empty and error states. Selection survives Activity
+recreation in the retained ViewModel, and resets to Offline after process death.
 
-```json
-{
-  "data": {
-    "results": [
-      {
-        "id": 1,
-        "title": "Fictional example",
-        "description": "Optional description",
-        "thumbnail": { "path": "https://images.example.invalid/cover", "extension": "jpg" }
-      }
-    ]
-  }
-}
-```
+### Verified API contract
 
-`data.results` is required; `[]` is an empty catalog. IDs must be positive and unique,
-and titles must not be blank. Description and thumbnail are optional. Malformed payloads
-become safe domain failures rather than raw error bodies shown to the user.
+`GET comics` returns `{"data":{"results":[...]}}`. `data.results` is required; `[]` is
+valid. Each entry requires a positive unique integer `id` and a nonblank `title`.
+Optional nullable fields are `description`, `series`, `issueNumber`, `volumeNumber`,
+`genre`, `publicationYear`, `shortSynopsis`, `synopsis` and `coverKey`. Numbers, when
+present, must be positive. Missing synopses fall back to description; missing metadata
+stays null. DTO, domain and UI models remain separate. Invalid JSON, missing required
+fields and duplicate IDs become recoverable errors.
+
+The checked-in `data/src/test/resources/railway-comics.json` was captured from production
+on 2026-11-03. It contains IDs 1–6, issues 1/3/2/5 for IDs 1–4, **volume 1** for ID 5,
+and issue 1 for ID 6. All metadata and story text match the embedded catalog. The API
+supplies cover keys rather than image URLs: the six matching bundled WebP files are
+used in both modes. Unknown keys use the existing safe image/placeholder path. Legacy
+optional `thumbnail: {path, extension}` remains supported with HTTPS validation.
+
+Automated network tests use MockWebServer and this local fixture; CI does not contact
+Railway. Online use requires connectivity and backend availability. Existing screenshots
+remain offline captures and do not demonstrate the Online selector.
 
 ### URL and image security boundaries
 
@@ -126,7 +214,7 @@ become safe domain failures rather than raw error bodies shown to the user.
 - DTO mapping drops image URLs with HTTP, userinfo, query, fragments or non-HTTP schemes.
 - Coil uses the Application ImageLoader factory with a separate HTTPS-only client. Image
   requests do not share catalog authentication and do not follow redirects, even on the
-  same host. Failures fall back to a decorative local cover placeholder.
+  same host. Failures fall back to a local placeholder with an accessible unavailable label.
 
 CDNs requiring redirects or signed query URLs are unsupported. There is no host allowlist,
 private-IP filtering, certificate pinning or image proxy. A trusted gateway must select
@@ -134,9 +222,27 @@ appropriate image origins; HTTPS alone does not establish reputation or privacy.
 Coil fetchers are unchanged, but the catalog does not accept arbitrary user-supplied URIs.
 
 Provider availability, API terms, attribution, image licenses and server-side abuse limits
-must be reviewed before using a real service. No external integration is claimed validated.
+must be reviewed before using a real service. The public Railway response contract was verified; availability is not guaranteed.
 Historical credentials removed in Phase 1 remain in Git history; rotation/revocation belongs
 to the repository owner. They are not needed by the demo or CI.
+
+## Current Railway integration validation
+
+See [Railway integration validation](docs/railway-integration-validation.md) for the changed
+files, exact contract, commands and limitations. On 2026-11-03: 47 JVM tests passed;
+lint reported 0 errors and 34 warnings; app/test APK compilation passed; all 20 URL checks
+passed. That initial local instrumented attempt was blocked by emulator/ADB communication.
+Subsequent GitHub [run 41658203476](https://github.com/jSantini/comics_sample/actions/runs/41658203476)
+for `d2027b0` completed successfully in both jobs; official logs confirm 43 instrumented
+tests and a successful connected-test task. Separately, the owner reports 43 instrumented
+tests passed on Windows and visually checked the live Online catalog. Those Windows/visual
+checks were not rerun in the final review. Screenshots remain offline captures.
+
+See the [final integration review](docs/final-integration-review.md) for the evidence matrix
+and two-stage PR plan, and the [sanitized security audit](docs/security-history-audit.md)
+for current-tree versus historical exposure. Historical provider status is unverified;
+previous artwork and a non-expired old APK artifact remain accessible at review time.
+These documents record the reviewed code snapshot; documentation publication does not authorize a merge.
 
 ## Tests and reproducible checks
 
@@ -153,19 +259,29 @@ python3 scripts/verify_catalog_url.py
 ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest -PCOMICS_BASE_URL=
 ```
 
-The URL script requires Python 3/JDK 17/SDK, uses public synthetic fixtures, removes its
-temporary Java classes and regenerates default BuildConfig in `finally`.
+The URL script requires Python 3/JDK 17/SDK, uses public URL fixtures, removes its
+temporary Java classes and restores an explicitly empty (offline-only) BuildConfig in `finally`.
 
 The Phase 1 JVM suites cover DTOs, repository/HTTP behavior, cancellation, ViewModel/retry,
 concurrent-load suppression and image transport/TLS. Test certificates are generated in
 memory; production TLS is not relaxed. They do not test Android image decoding.
 
-The new Compose screen tests inject states/callbacks directly, without Hilt test injection,
-a ViewModel, a backend or remote image URLs. They cover loading, content, demo/remote identity, empty/error recovery,
+The isolated Compose screen/navigation tests inject states/callbacks directly, without Hilt
+test injection, a ViewModel, a backend or remote image URLs. They cover loading, content, demo/remote identity, empty/error recovery,
 retry transitions, a minimum 48dp retry control, scrolling and 2x text in dark mode.
+Additional tests cover the supplied six-comic metadata/text, Android cover mapping,
+ID selection, card callbacks, details, optional remote metadata, volume/issue distinction,
+invalid IDs, both back paths, saved destination restoration and large-font dark details.
+Integration tests add an Activity-owned real ViewModel, fake Repository call counter and
+real NavHost, including Activity recreation and ID lookup while a catalog load is pending.
+Cover pipeline tests inject an ImageLoader to verify source precedence/failures without
+external HTTP; a wrapped bitmap decoder checks off-main execution and sampled resource size.
 A legacy context test also remains. Compiling these tests is not executing them.
 
-See [Phase 2 evidence and limitations](docs/phase-two-validation.md),
+See [Visual refinement validation](docs/visual-refinement-validation.md),
+[Cover/integration hardening validation](docs/cover-hardening-validation.md),
+[Catalog and details validation before hardening](docs/catalog-details-validation.md),
+[Phase 2 evidence and limitations](docs/phase-two-validation.md),
 [Phase 1 evidence](docs/phase-one-validation.md) and
 [URL/image hardening evidence](docs/review-hardening-validation.md).
 No coverage percentage, device result or performance metric is implied by this README.
@@ -185,23 +301,22 @@ and `modernization/phase-one`, plus manual dispatch. Documentation-only changes 
   downloads still need Internet. Emulator-host availability can prevent the UI job from running.
 
 Local workflow validation does not establish a successful GitHub run. Check the Actions
-page for the specific review commit; artifacts only exist after an actual run. Local
-Compose tests were compiled, not executed. There are no release, signing, deployment
+page for the specific review commit; artifacts only exist after an actual run. See the current integration validation above for local
+Compose execution results. There are no release, signing, deployment
 or merge steps.
 
-## UI previews and screenshots
+## UI previews and manual checks
 
 Open `ComicsListPreviews.kt` in Android Studio for loading/content/empty/error previews
-in light, dark and 2x-font configurations. All preview stories are fictional and have no
+and detail previews in light, dark and 2x-font configurations. All preview stories are fictional and have no
 remote image URLs. Cards grow with text; status content and lists can scroll. Semantics
-provide headings, a labeled progress indicator and recovery controls; covers are decorative.
+provide headings, a labeled progress indicator and recovery controls. Rendered covers are
+decorative next to their title; unavailable placeholders have a label.
 TalkBack, visual contrast, device rendering and accessibility still require manual review.
 
-| Real screenshot to capture | Status |
-| --- | --- |
-| Light theme, offline content | Not captured |
-| Dark theme, offline content | Not captured |
-| Large-font content and recovery states | Not captured |
+The four real emulator captures are shown in [Screenshots](#screenshots).
+Large-font and recovery-state visual/accessibility checks remain separate manual checks;
+the gallery is not evidence that every device or accessibility configuration was reviewed.
 
 No mock screenshots, fabricated imagery, CI badges or performance numbers are used.
 
@@ -209,6 +324,8 @@ No mock screenshots, fabricated imagery, CI badges or performance numbers are us
 
 All changes follow the Human-Governed Engineering Protocol. Architectural ownership,
 acceptance and approval remain with the maintainer. Existing Git authorship and Codex
-assistance attribution are preserved. Phase 2 is prepared as a separate commit on
-`modernization/phase-one` for human review and CI validation. No merge, backend
-implementation, agent infrastructure or broad toolchain upgrade is part of this phase.
+assistance attribution are preserved. PR #1 integrates `feature/offline-comics-details`
+into `modernization/phase-one`; only after that approved integration should a separate
+Phase One to `master` PR be opened. Both merges require explicit approval. Historical
+provider configuration and artwork handling remain owner decisions. No merge, history
+rewrite or toolchain upgrade is performed by the final review.
