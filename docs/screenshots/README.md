@@ -1,15 +1,19 @@
 # Real Android screenshot capture
 
-Status: **all four real screenshots supplied** by the maintainer from the Android Studio
+Status: **six real screenshots supplied** by the maintainer from the Android Studio
 emulator on Windows and integrated into the main README. Each PNG is 1080 × 1920 (9:16).
-They show the light/dark catalog, Aurora details in dark theme and Sentinela Neon details
-in light theme (including Edição 5). The images are readable at their native resolution;
+The four original captures show the light/dark Offline catalog, Aurora details in dark
+theme and Sentinela Neon details in light theme (including Edição 5). The final comparison
+pair shows Offline selected with the six bundled comics and Online selected with the
+three API-exclusive stories at the top of the nine-comic Railway catalog. The images
+are readable at their native resolution;
 no private content, keyboard, dialog or development overlay was observed in visual inspection.
 Ordinary Android status/navigation bars are preserved.
 
 The two supplied detail filenames were reversed. They were swapped to match their actual
-content without re-encoding, cropping or changing any bytes within either capture. Catalog
-files are unchanged. No screenshot was generated, edited or captured in this cloud workspace.
+content without re-encoding, cropping or changing any bytes within either capture. The four
+original PNGs remain unchanged. The comparison pair uses the owner's final supplied PNGs
+without cropping, resizing or recompression. No screenshot was generated or retouched.
 The maintainer reports real emulator provenance; PNG dimensions alone do not prove provenance.
 Device model/API level and the exact installed capture build were not independently verified.
 
@@ -17,7 +21,23 @@ The following instructions remain a reproduction guide. For a matching refresh, 
 Aurora in dark mode; a future light-mode Aurora capture is optional and must be labeled
 accordingly. Compose previews and generated cover artwork are not screenshot substitutes.
 
-## Capture the reviewed application on Windows
+## Final Offline/Online comparison
+
+- `catalog-offline.png`: Offline selected, six bundled comics and local WebP covers;
+  no backend request is required.
+- `catalog-online.png`: Online selected, nine Railway comics. Protocolo Ômega,
+  Distrito Neon and O Reino das Cinzas appear first with remote covers; the six shared
+  comics follow with their bundled WebPs.
+
+Use a current build with the public Railway URL configured, such as
+`.\gradlew.bat :app:installDebug` without an empty COMICS_BASE_URL override. Select Offline
+and capture the catalog; then select Online, wait for the catalog and remote covers to
+finish loading, and capture it. Preserve native PNG bytes and 1080 × 1920 dimensions.
+The comparison in the README displays each image at 280px width. Screenshot content
+shows the selected source and rendered data; it does not independently prove network
+transport. The historical six-entry test fixture intentionally remains unchanged.
+
+## Reproduce the original four Offline captures on Windows
 
 Use Android Studio's working emulator and this repository's `feature/offline-comics-details`
 branch. The reviewed application source is commit
