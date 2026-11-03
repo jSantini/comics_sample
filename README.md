@@ -231,9 +231,18 @@ to the repository owner. They are not needed by the demo or CI.
 See [Railway integration validation](docs/railway-integration-validation.md) for the changed
 files, exact contract, commands and limitations. On 2026-11-03: 47 JVM tests passed;
 lint reported 0 errors and 34 warnings; app/test APK compilation passed; all 20 URL checks
-passed. Instrumented execution was attempted but blocked by emulator/ADB communication
-and installation stalls; no instrumented pass or live Android Online verification is claimed.
-Screenshots remain offline captures.
+passed. That initial local instrumented attempt was blocked by emulator/ADB communication.
+Subsequent GitHub [run 41658203476](https://github.com/jSantini/comics_sample/actions/runs/41658203476)
+for `d2027b0` completed successfully in both jobs; official logs confirm 43 instrumented
+tests and a successful connected-test task. Separately, the owner reports 43 instrumented
+tests passed on Windows and visually checked the live Online catalog. Those Windows/visual
+checks were not rerun in the final review. Screenshots remain offline captures.
+
+See the [final integration review](docs/final-integration-review.md) for the evidence matrix
+and two-stage PR plan, and the [sanitized security audit](docs/security-history-audit.md)
+for current-tree versus historical exposure. Historical provider status is unverified;
+previous artwork and a non-expired old APK artifact remain accessible at review time.
+These documents record the reviewed code snapshot; documentation publication does not authorize a merge.
 
 ## Tests and reproducible checks
 
@@ -292,7 +301,7 @@ and `modernization/phase-one`, plus manual dispatch. Documentation-only changes 
   downloads still need Internet. Emulator-host availability can prevent the UI job from running.
 
 Local workflow validation does not establish a successful GitHub run. Check the Actions
-page for the specific review commit; artifacts only exist after an actual run. See the current integration validation below for local
+page for the specific review commit; artifacts only exist after an actual run. See the current integration validation above for local
 Compose execution results. There are no release, signing, deployment
 or merge steps.
 
@@ -315,6 +324,8 @@ No mock screenshots, fabricated imagery, CI badges or performance numbers are us
 
 All changes follow the Human-Governed Engineering Protocol. Architectural ownership,
 acceptance and approval remain with the maintainer. Existing Git authorship and Codex
-assistance attribution are preserved. Phase 2 is prepared as a separate commit on
-`modernization/phase-one` for human review and CI validation. No merge, backend
-implementation, agent infrastructure or broad toolchain upgrade is part of this phase.
+assistance attribution are preserved. PR #1 integrates `feature/offline-comics-details`
+into `modernization/phase-one`; only after that approved integration should a separate
+Phase One to `master` PR be opened. Both merges require explicit approval. Historical
+provider configuration and artwork handling remain owner decisions. No merge, history
+rewrite or toolchain upgrade is performed by the final review.
