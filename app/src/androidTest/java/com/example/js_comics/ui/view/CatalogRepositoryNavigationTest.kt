@@ -42,14 +42,14 @@ class CatalogRepositoryNavigationTest {
         }
     }
 
-    private fun installRoot(repository: CountingRepository, exposeNavigation: Boolean = false): ComicsViewModel {
+    private fun installRoot(repository: CountingRepository, exposeNavigation: Boolean = false, online: CountingRepository = repository): ComicsViewModel {
         lateinit var model: ComicsViewModel
         compose.activityRule.scenario.onActivity { activity ->
             model = ViewModelProvider(activity, object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     require(modelClass == ComicsViewModel::class.java)
                     @Suppress("UNCHECKED_CAST")
-                    return ComicsViewModel(repository) as T
+                    return ComicsViewModel(repository, online) as T
                 }
             })[ComicsViewModel::class.java]
             // Reinstall the same root after Activity recreation. The Activity's saved-state
@@ -132,5 +132,23 @@ class CatalogRepositoryNavigationTest {
         }
         compose.onNodeWithTag("details_title").performScrollTo().assertTextEquals("Selected fixture")
         compose.runOnIdle { assertEquals(1, repository.calls.get()) }
+    }
+
+    @Test fun switchingSourceShowsCurrentDetailsAndSurvivesRecreation() {
+        val repository = CountingRepository(catalog)
+        val remote = CountingRepository(ComicsCatalog(listOf(Comic(42, "Remote selected", "Remote synopsis", null, coverKey = "aurora")), CatalogSource.REMOTE))
+        val model = installRoot(repository, online = remote)
+        compose.onNodeWithText("Online", useUnmergedTree = true).performClick()
+        compose.runOnIdle { assertEquals(CatalogSource.REMOTE, model.source.value) }
+        compose.onNodeWithTag("comic_card_42").performScrollTo().performClick()
+        compose.onNodeWithTag("details_title").performScrollTo().assertTextEquals("Remote selected")
+        compose.activityRule.scenario.recreate()
+        val after = installRoot(repository, online = remote)
+        compose.runOnIdle { assertSame(model, after); assertEquals(CatalogSource.REMOTE, after.source.value) }
+        compose.onNodeWithTag("details_back").performClick()
+        compose.onNodeWithText("Offline", useUnmergedTree = true).performClick()
+        compose.runOnIdle { assertEquals(CatalogSource.DEMO, model.source.value) }
+        compose.onNodeWithTag("comic_card_42").performScrollTo().performClick()
+        compose.onNodeWithTag("details_title").performScrollTo().assertTextEquals("Selected fixture")
     }
 }

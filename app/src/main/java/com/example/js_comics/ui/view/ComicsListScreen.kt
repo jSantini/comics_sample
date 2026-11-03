@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.FilterChip
+import com.example.js_comics.domain.CatalogSource
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,36 +60,54 @@ object ComicsScreenTags {
 @Composable
 fun ComicsRoute(viewModel: ComicsViewModel = composeViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    ComicsCatalogNavigation(state, viewModel::retry)
+    val source by viewModel.source.collectAsStateWithLifecycle()
+    ComicsCatalogNavigation(state, viewModel::retry, source = source, onSourceSelected = viewModel::selectSource)
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun ComicsListScreen(state: ComicsUiState, onRetry: () -> Unit, onComicClick: (Int) -> Unit = {}) {
+fun ComicsListScreen(state: ComicsUiState, onRetry: () -> Unit, onComicClick: (Int) -> Unit = {},
+    source: CatalogSource? = null, onSourceSelected: (CatalogSource) -> Unit = {}) {
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        when (state) {
-            ComicsUiState.Loading -> Box(Modifier.testTag(ComicsScreenTags.LOADING)) { LoadingBar() }
-            is ComicsUiState.Content -> LazyColumn(
-                modifier = Modifier.fillMaxSize().testTag(ComicsScreenTags.CONTENT),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                item(key = "source") { SourceLabel(state.isDemo) }
-                item(key = "heading") {
-                    Text(
-                        stringResource(R.string.catalog_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().semantics { heading() },
-                    )
+        Column(Modifier.fillMaxSize()) {
+            if (source != null) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FilterChip(selected = source == CatalogSource.DEMO, onClick = { onSourceSelected(CatalogSource.DEMO) },
+                        label = { Text(stringResource(R.string.mode_offline)) })
+                    FilterChip(selected = source == CatalogSource.REMOTE, onClick = { onSourceSelected(CatalogSource.REMOTE) },
+                        label = { Text(stringResource(R.string.mode_online)) })
                 }
-                items(state.items, key = { it.id }) { ComicCard(it, onComicClick) }
+                if (state is ComicsUiState.Error || state == ComicsUiState.Loading) {
+                    SourceLabel(source == CatalogSource.DEMO, Modifier.padding(horizontal = 20.dp), compact = true)
+                }
             }
-            is ComicsUiState.Empty -> Column(Modifier.fillMaxSize().testTag(ComicsScreenTags.EMPTY)) {
-                SourceLabel(state.isDemo, Modifier.padding(horizontal = 20.dp, vertical = 16.dp))
-                StatusContent(stringResource(R.string.empty_title), stringResource(R.string.empty_catalog), onRetry)
-            }
-            is ComicsUiState.Error -> Box(Modifier.testTag(ComicsScreenTags.ERROR)) {
-                StatusContent(stringResource(R.string.error_title), stringResource(state.failure.messageResource()), onRetry)
+            Box(Modifier.weight(1f)) {
+                when (state) {
+                    ComicsUiState.Loading -> Box(Modifier.testTag(ComicsScreenTags.LOADING)) { LoadingBar() }
+                    is ComicsUiState.Content -> LazyColumn(
+                        modifier = Modifier.fillMaxSize().testTag(ComicsScreenTags.CONTENT),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        item(key = "source") { SourceLabel(state.isDemo) }
+                        item(key = "heading") {
+                            Text(
+                                stringResource(R.string.catalog_title),
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().semantics { heading() },
+                            )
+                        }
+                        items(state.items, key = { it.id }) { ComicCard(it, onComicClick) }
+                    }
+                    is ComicsUiState.Empty -> Column(Modifier.fillMaxSize().testTag(ComicsScreenTags.EMPTY)) {
+                        SourceLabel(state.isDemo, Modifier.padding(horizontal = 20.dp, vertical = 16.dp))
+                        StatusContent(stringResource(R.string.empty_title), stringResource(R.string.empty_catalog), onRetry)
+                    }
+                    is ComicsUiState.Error -> Box(Modifier.testTag(ComicsScreenTags.ERROR)) {
+                        StatusContent(stringResource(R.string.error_title), stringResource(state.failure.messageResource()), onRetry)
+                    }
+                }
             }
         }
     }

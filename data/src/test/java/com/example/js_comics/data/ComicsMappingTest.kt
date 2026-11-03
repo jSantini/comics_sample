@@ -44,4 +44,21 @@ class ComicsMappingTest {
             assertNull(response(ComicDto(1, "Title", thumbnail = ThumbnailDto(it, "jpg"))).toComics().single().imageUrl)
         }
     }
+
+    @Test fun rejectsInvalidOptionalNumbers() {
+        listOf(ComicDto(1, "Title", issueNumber = 0), ComicDto(1, "Title", volumeNumber = -1),
+            ComicDto(1, "Title", publicationYear = 0)).forEach {
+            assertEquals(ComicsFailure.INVALID_DATA, assertThrows(ComicsException::class.java) { response(it).toComics() }.failure)
+        }
+    }
+    @Test fun mapsDistinctSynopsisAndVolumeWithoutInventingAnIssue() {
+        val comic = response(ComicDto(5, "Title", description = "Description", series = "Series",
+            volumeNumber = 1, genre = "Genre", publicationYear = 2026,
+            shortSynopsis = "Short", synopsis = "Full", coverKey = "eclipse")).toComics().single()
+        assertEquals("Description", comic.description)
+        assertEquals("Full", comic.synopsis)
+        assertEquals("Short", comic.shortSynopsis)
+        assertEquals(1, comic.volumeNumber)
+        assertNull(comic.issueNumber)
+    }
 }

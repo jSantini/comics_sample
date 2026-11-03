@@ -55,7 +55,22 @@ sealed interface ComicsUiState {
 }
 
 @HiltViewModel
-class ComicsViewModel @Inject constructor(private val repository: ComicsRepository) : ViewModel() {
+class ComicsViewModel @Inject constructor(
+    private val repository: ComicsRepository,
+    @com.example.js_comics.data.di.OnlineCatalog private val onlineRepository: ComicsRepository = repository,
+) : ViewModel() {
+    private val mutableSource = MutableStateFlow(CatalogSource.DEMO)
+    val source: StateFlow<CatalogSource> = mutableSource.asStateFlow()
+
+    @MainThread
+    fun selectSource(source: CatalogSource) {
+        if (source == mutableSource.value) return
+        loadJob?.cancel()
+        loadJob = null
+        mutableSource.value = source
+        mutableState.value = ComicsUiState.Loading
+        retry()
+    }
     private val mutableState = MutableStateFlow<ComicsUiState>(ComicsUiState.Loading)
     val state: StateFlow<ComicsUiState> = mutableState.asStateFlow()
     private var loadJob: Job? = null
@@ -66,10 +81,11 @@ class ComicsViewModel @Inject constructor(private val repository: ComicsReposito
     @MainThread
     fun retry() {
         if (loadJob?.isActive == true) return
+        val selectedRepository = if (source.value == CatalogSource.DEMO) repository else onlineRepository
         loadJob = viewModelScope.launch {
             mutableState.value = ComicsUiState.Loading
             try {
-                val catalog = repository.getComics()
+                val catalog = selectedRepository.getComics()
                 currentCoroutineContext().ensureActive()
                 val isDemo = catalog.source == CatalogSource.DEMO
                 mutableState.value = if (catalog.comics.isEmpty()) ComicsUiState.Empty(isDemo) else {

@@ -98,4 +98,80 @@ class ComicsViewModelTest {
         advanceUntilIdle()
         assertEquals(ComicsUiState.Error(ComicsFailure.UNEXPECTED), vm.state.value)
     }
+
+    @Test fun offlineDefaultSwitchBothWaysAndRetryActiveSource() = runTest {
+        val offline = FakeRepository { catalog }
+        val remote = FakeRepository { ComicsCatalog(listOf(Comic(1, "Online", "Remote story", null)), CatalogSource.REMOTE) }
+        val vm = ComicsViewModel(offline, remote)
+        assertEquals(CatalogSource.DEMO, vm.source.value)
+        advanceUntilIdle()
+        assertEquals(0, remote.calls)
+        vm.selectSource(CatalogSource.REMOTE)
+        assertEquals(ComicsUiState.Loading, vm.state.value)
+        assertNull(vm.state.value.comicWithId(1))
+        advanceUntilIdle()
+        assertEquals("Remote story", vm.state.value.comicWithId(1)!!.synopsis)
+        assertFalse((vm.state.value as ComicsUiState.Content).isDemo)
+        vm.retry()
+        advanceUntilIdle()
+        assertEquals(2, remote.calls)
+        vm.selectSource(CatalogSource.DEMO)
+        advanceUntilIdle()
+        assertEquals("Story", vm.state.value.comicWithId(1)!!.synopsis)
+        vm.retry()
+        advanceUntilIdle()
+        assertEquals(3, offline.calls)
+    }
+
+    @Test fun onlineFailureDoesNotFallBackAndRetryUsesOnline() = runTest {
+        val offline = FakeRepository { catalog }
+        val remote = FakeRepository { throw ComicsException(ComicsFailure.NETWORK) }
+        val vm = ComicsViewModel(offline, remote)
+        advanceUntilIdle()
+        vm.selectSource(CatalogSource.REMOTE)
+        advanceUntilIdle()
+        assertEquals(ComicsUiState.Error(ComicsFailure.NETWORK), vm.state.value)
+        assertNull(vm.state.value.comicWithId(1))
+        vm.retry()
+        advanceUntilIdle()
+        assertEquals(2, remote.calls)
+        assertEquals(1, offline.calls)
+    }
+
+    @Test fun rapidSwitchCancelsOldSourceEvenWhenItReturnsLate() = runTest {
+        val late = CompletableDeferred<Unit>()
+        var cancelled = false
+        val remote = FakeRepository {
+            try { awaitCancellation() } catch (_: CancellationException) {
+                cancelled = true
+                withContext(NonCancellable) { late.await() }
+            }
+            catalog.copy(source = CatalogSource.REMOTE)
+        }
+        val vm = ComicsViewModel(FakeRepository { catalog }, remote)
+        advanceUntilIdle()
+        vm.selectSource(CatalogSource.REMOTE)
+        runCurrent()
+        vm.selectSource(CatalogSource.DEMO)
+        runCurrent()
+        assertTrue(cancelled)
+        late.complete(Unit)
+        advanceUntilIdle()
+        assertTrue((vm.state.value as ComicsUiState.Content).isDemo)
+        repeat(5) {
+            vm.selectSource(CatalogSource.REMOTE)
+            vm.selectSource(CatalogSource.DEMO)
+        }
+        advanceUntilIdle()
+        assertTrue((vm.state.value as ComicsUiState.Content).isDemo)
+    }
+
+    @Test fun emptyOnlineCatalogKeepsRemoteSource() = runTest {
+        val vm = ComicsViewModel(FakeRepository { catalog },
+            FakeRepository { ComicsCatalog(emptyList(), CatalogSource.REMOTE) })
+        advanceUntilIdle()
+        vm.selectSource(CatalogSource.REMOTE)
+        advanceUntilIdle()
+        assertEquals(ComicsUiState.Empty(false), vm.state.value)
+    }
 }

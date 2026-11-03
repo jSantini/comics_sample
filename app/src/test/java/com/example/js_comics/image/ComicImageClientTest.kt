@@ -33,6 +33,10 @@ class ComicImageClientTest {
             .build()
     }
 
+    // Windows may reverse-resolve loopback as kubernetes.docker.internal. Keep the
+    // request hostname aligned with the localhost SAN; retain real TLS verification.
+    private fun fixtureUrl(path: String) = server.url(path).newBuilder().host("localhost").build()
+
     @After
     fun teardown() {
         client.connectionPool.evictAll()
@@ -43,7 +47,7 @@ class ComicImageClientTest {
     @Test
     fun directHttpsImageCanBeDownloaded() {
         server.enqueue(MockResponse().setHeader("Content-Type", "image/png").setBody("fixture image bytes"))
-        client.newCall(Request.Builder().url(server.url("/cover.png")).build()).execute().use {
+        client.newCall(Request.Builder().url(fixtureUrl("/cover.png")).build()).execute().use {
             assertEquals(200, it.code)
             assertEquals("fixture image bytes", it.body!!.string())
         }
@@ -63,7 +67,7 @@ class ComicImageClientTest {
 
     @Test
     fun rejectsUserinfoQueryAndFragmentBeforeNetwork() {
-        val base = server.url("/cover.png")
+        val base = fixtureUrl("/cover.png")
         val invalid = listOf(
             base.newBuilder().username("fixture-user").password("fixture-password").build(),
             base.newBuilder().query("token=fixture").build(),
@@ -79,9 +83,9 @@ class ComicImageClientTest {
 
     @Test
     fun doesNotFollowHttpsRedirectEvenOnSameHost() {
-        server.enqueue(MockResponse().setResponseCode(302).setHeader("Location", server.url("/target.png")))
+        server.enqueue(MockResponse().setResponseCode(302).setHeader("Location", fixtureUrl("/target.png")))
         server.enqueue(MockResponse().setBody("must not be downloaded"))
-        client.newCall(Request.Builder().url(server.url("/cover.png")).build()).execute().use {
+        client.newCall(Request.Builder().url(fixtureUrl("/cover.png")).build()).execute().use {
             assertEquals(302, it.code)
         }
         assertEquals(1, server.requestCount)
@@ -93,7 +97,7 @@ class ComicImageClientTest {
             target.start()
             val destination = target.url("/target.png").newBuilder().scheme("https").host("127.0.0.1").build()
             server.enqueue(MockResponse().setResponseCode(307).setHeader("Location", destination))
-            client.newCall(Request.Builder().url(server.url("/cover.png")).build()).execute().use {
+            client.newCall(Request.Builder().url(fixtureUrl("/cover.png")).build()).execute().use {
                 assertEquals(307, it.code)
             }
             assertEquals(0, target.requestCount)
@@ -105,7 +109,7 @@ class ComicImageClientTest {
         MockWebServer().use { target ->
             target.start()
             server.enqueue(MockResponse().setResponseCode(301).setHeader("Location", target.url("/target.png")))
-            client.newCall(Request.Builder().url(server.url("/cover.png")).build()).execute().use {
+            client.newCall(Request.Builder().url(fixtureUrl("/cover.png")).build()).execute().use {
                 assertEquals(301, it.code)
             }
             assertEquals(0, target.requestCount)
@@ -117,7 +121,7 @@ class ComicImageClientTest {
         val productionClient = comicImageClient()
         try {
             assertThrows(SSLHandshakeException::class.java) {
-                productionClient.newCall(Request.Builder().url(server.url("/cover.png")).build()).execute().close()
+                productionClient.newCall(Request.Builder().url(fixtureUrl("/cover.png")).build()).execute().close()
             }
             assertEquals(0, server.requestCount)
         } finally {

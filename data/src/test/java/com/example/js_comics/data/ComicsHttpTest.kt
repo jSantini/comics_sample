@@ -77,4 +77,17 @@ class ComicsHttpTest {
         job.cancelAndJoin()
         assertTrue(job.isCancelled)
     }
+
+    @Test fun railwayFixtureMapsAllSixComicsExactlyLikeOffline() = runTest {
+        val fixture = javaClass.getResource("/railway-comics.json")!!.readText()
+        server.enqueue(MockResponse().setBody(fixture))
+        val actual = repository.getComics()
+        val expected = com.example.js_comics.data.repository.DemoComicsRepository().getComics()
+        assertEquals(com.example.js_comics.domain.CatalogSource.REMOTE, actual.source)
+        assertEquals(6, actual.comics.size)
+        assertEquals(expected.comics, actual.comics)
+        assertEquals(1, actual.comics[4].volumeNumber)
+        assertNull(actual.comics[4].issueNumber)
+        assertEquals(listOf("aurora", "cidade_papel", "alem_orbita", "sentinela_neon", "eclipse", "vigilante"), actual.comics.map { it.coverKey })
+    }
 }

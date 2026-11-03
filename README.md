@@ -4,8 +4,9 @@ A deliberately small Android sample for discussing architecture, concurrency, UI
 security boundaries and reproducible validation in senior engineering interviews.
 It is a reviewable engineering exercise, not a production-readiness claim.
 
-The default app is an **offline demo** containing six fictional comics and bundled cover
-images. It does not call Marvel, require credentials, or download images. The existing
+The app starts with an **offline demo** containing six fictional comics and bundled cover
+images. Select Online to load the same catalog from Railway. Both modes use local artwork
+and require no credentials or Marvel calls. The existing
 story fixtures are fictional Portuguese text; the interface is in Portuguese; this project guide is in English.
 
 ## What the app demonstrates
@@ -155,40 +156,52 @@ loading/error states remain explicit. There is no persistent cache for remote da
 
 Room/DataStore/Paging and extra feature modules are deliberately absent.
 
-## Optional remote catalog
+## Offline and Online catalog
 
-The default remains offline. A separate, trusted **public HTTPS gateway** can be enabled
-with a non-secret build property:
+The app starts in **Offline**, using `DemoComicsRepository` without a network request.
+Select **Online** on the catalog to load `RemoteComicsRepository` from the deployed
+[Railway API](https://comics-showcase-api-production.up.railway.app/api/comics).
+Backend source: [jSantini/comics-showcase-api](https://github.com/jSantini/comics-showcase-api).
+
+The public default `COMICS_BASE_URL` is
+`https://comics-showcase-api-production.up.railway.app/api/`. Build and install:
 
 ```bash
-./gradlew :app:assembleDebug -PCOMICS_BASE_URL=https://catalog.example.invalid/api/
+./gradlew :app:installDebug
+# Then tap Online in the catalog.
+# Explicit production configuration:
+./gradlew :app:installDebug -PCOMICS_BASE_URL=https://comics-showcase-api-production.up.railway.app/api/
+# Offline-only build, with no configured backend:
+./gradlew :app:installDebug -PCOMICS_BASE_URL=
 ```
 
-That address is a non-operational example. The app calls `GET /api/comics`, depending on
-the supplied prefix. No backend is implemented here and the app does not sign Marvel
-requests. Provider credentials and signatures belong exclusively on a separately managed
-server. This contract is not a private/authenticated user catalog.
+With an empty URL, Offline remains fully functional; Online shows a recoverable network
+error. There is no silent fallback, persistent cache or automatic retry. Retry reloads the
+selected source. Switching sources cancels the previous load and immediately clears its
+items; cancellation is checked before publishing results or failures. A source indicator
+is visible during loading, content, empty and error states. Selection survives Activity
+recreation in the retained ViewModel, and resets to Offline after process death.
 
-```json
-{
-  "data": {
-    "results": [
-      {
-        "id": 1,
-        "title": "Fictional example",
-        "description": "Optional description",
-        "thumbnail": { "path": "https://images.example.invalid/cover", "extension": "jpg" }
-      }
-    ]
-  }
-}
-```
+### Verified API contract
 
-`data.results` is required; `[]` is an empty catalog. IDs must be positive and unique,
-and titles must not be blank. Description and thumbnail are optional. The current DTO
-supplies no series, issue, volume, genre, year or cover key; those stay null. Provider
-description is used as synopsis, without fabricating richer metadata. Malformed payloads
-become safe domain failures rather than raw error bodies shown to the user.
+`GET comics` returns `{"data":{"results":[...]}}`. `data.results` is required; `[]` is
+valid. Each entry requires a positive unique integer `id` and a nonblank `title`.
+Optional nullable fields are `description`, `series`, `issueNumber`, `volumeNumber`,
+`genre`, `publicationYear`, `shortSynopsis`, `synopsis` and `coverKey`. Numbers, when
+present, must be positive. Missing synopses fall back to description; missing metadata
+stays null. DTO, domain and UI models remain separate. Invalid JSON, missing required
+fields and duplicate IDs become recoverable errors.
+
+The checked-in `data/src/test/resources/railway-comics.json` was captured from production
+on 2026-11-03. It contains IDs 1–6, issues 1/3/2/5 for IDs 1–4, **volume 1** for ID 5,
+and issue 1 for ID 6. All metadata and story text match the embedded catalog. The API
+supplies cover keys rather than image URLs: the six matching bundled WebP files are
+used in both modes. Unknown keys use the existing safe image/placeholder path. Legacy
+optional `thumbnail: {path, extension}` remains supported with HTTPS validation.
+
+Automated network tests use MockWebServer and this local fixture; CI does not contact
+Railway. Online use requires connectivity and backend availability. Existing screenshots
+remain offline captures and do not demonstrate the Online selector.
 
 ### URL and image security boundaries
 
@@ -209,9 +222,18 @@ appropriate image origins; HTTPS alone does not establish reputation or privacy.
 Coil fetchers are unchanged, but the catalog does not accept arbitrary user-supplied URIs.
 
 Provider availability, API terms, attribution, image licenses and server-side abuse limits
-must be reviewed before using a real service. No external integration is claimed validated.
+must be reviewed before using a real service. The public Railway response contract was verified; availability is not guaranteed.
 Historical credentials removed in Phase 1 remain in Git history; rotation/revocation belongs
 to the repository owner. They are not needed by the demo or CI.
+
+## Current Railway integration validation
+
+See [Railway integration validation](docs/railway-integration-validation.md) for the changed
+files, exact contract, commands and limitations. On 2026-11-03: 47 JVM tests passed;
+lint reported 0 errors and 34 warnings; app/test APK compilation passed; all 20 URL checks
+passed. Instrumented execution was attempted but blocked by emulator/ADB communication
+and installation stalls; no instrumented pass or live Android Online verification is claimed.
+Screenshots remain offline captures.
 
 ## Tests and reproducible checks
 
@@ -228,8 +250,8 @@ python3 scripts/verify_catalog_url.py
 ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest -PCOMICS_BASE_URL=
 ```
 
-The URL script requires Python 3/JDK 17/SDK, uses public synthetic fixtures, removes its
-temporary Java classes and regenerates default BuildConfig in `finally`.
+The URL script requires Python 3/JDK 17/SDK, uses public URL fixtures, removes its
+temporary Java classes and restores an explicitly empty (offline-only) BuildConfig in `finally`.
 
 The Phase 1 JVM suites cover DTOs, repository/HTTP behavior, cancellation, ViewModel/retry,
 concurrent-load suppression and image transport/TLS. Test certificates are generated in
@@ -270,8 +292,8 @@ and `modernization/phase-one`, plus manual dispatch. Documentation-only changes 
   downloads still need Internet. Emulator-host availability can prevent the UI job from running.
 
 Local workflow validation does not establish a successful GitHub run. Check the Actions
-page for the specific review commit; artifacts only exist after an actual run. Local
-Compose tests were compiled, not executed. There are no release, signing, deployment
+page for the specific review commit; artifacts only exist after an actual run. See the current integration validation below for local
+Compose execution results. There are no release, signing, deployment
 or merge steps.
 
 ## UI previews and manual checks

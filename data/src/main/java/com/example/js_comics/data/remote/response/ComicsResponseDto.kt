@@ -13,6 +13,14 @@ data class ComicDto(
     val title: String? = null,
     val description: String? = null,
     val thumbnail: ThumbnailDto? = null,
+    val series: String? = null,
+    val issueNumber: Int? = null,
+    val volumeNumber: Int? = null,
+    val genre: String? = null,
+    val publicationYear: Int? = null,
+    val shortSynopsis: String? = null,
+    val synopsis: String? = null,
+    val coverKey: String? = null,
 )
 data class ThumbnailDto(val path: String? = null, val extension: String? = null)
 
@@ -29,7 +37,14 @@ fun ComicsResponseDto.toComics(): List<Comic> {
                 ?.takeIf { it.isHttps && it.username.isEmpty() && it.password.isEmpty() && it.query == null && it.fragment == null }
                 ?.toString()
         }
-        Comic(id, title, dto.description?.trim()?.takeIf { it.isNotEmpty() }, image)
+        fun String?.text() = this?.trim()?.takeIf { it.isNotEmpty() }
+        if (listOf(dto.issueNumber, dto.volumeNumber, dto.publicationYear).any { it != null && it <= 0 }) invalidData()
+        val description = dto.description.text()
+        Comic(id, title, description, image,
+            series = dto.series.text(), issueNumber = dto.issueNumber, volumeNumber = dto.volumeNumber,
+            genre = dto.genre.text(), publicationYear = dto.publicationYear,
+            shortSynopsis = dto.shortSynopsis.text() ?: description,
+            synopsis = dto.synopsis.text() ?: description, coverKey = dto.coverKey.text())
     }
     if (comics.map { it.id }.distinct().size != comics.size) invalidData()
     return comics

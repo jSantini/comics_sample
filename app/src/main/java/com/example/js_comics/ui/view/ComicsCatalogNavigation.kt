@@ -14,12 +14,14 @@ fun ComicsCatalogNavigation(
     state: ComicsUiState,
     onRetry: () -> Unit,
     navController: NavHostController = rememberNavController(),
+    source: com.example.js_comics.domain.CatalogSource? = null,
+    onSourceSelected: (com.example.js_comics.domain.CatalogSource) -> Unit = {},
 ) {
     NavHost(navController, startDestination = "catalog") {
         composable("catalog") {
-            ComicsListScreen(state, onRetry) { id ->
+            ComicsListScreen(state, onRetry, source = source, onSourceSelected = onSourceSelected, onComicClick = { id ->
                 navController.navigate("comic/$id") { launchSingleTop = true }
-            }
+            })
         }
         composable("comic/{comicId}", arguments = listOf(navArgument("comicId") { type = NavType.StringType })) { entry ->
             ComicDetailsScreen(

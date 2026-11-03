@@ -9,7 +9,7 @@ plugins {
 
 
 // Non-secret public gateway URL only. Never pass provider credentials as Gradle properties.
-val catalogUrl = providers.gradleProperty("COMICS_BASE_URL").orElse("").get()
+val catalogUrl = providers.gradleProperty("COMICS_BASE_URL").orElse("https://comics-showcase-api-production.up.railway.app/api/").get()
 if (catalogUrl.isNotEmpty()) {
     val uri = runCatching { URI(catalogUrl) }.getOrNull()
     require(uri != null && uri.scheme == "https" && !uri.host.isNullOrBlank() &&

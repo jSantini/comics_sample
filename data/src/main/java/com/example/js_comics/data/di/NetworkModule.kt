@@ -14,14 +14,27 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import javax.inject.Qualifier
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class OnlineCatalog
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     @Provides
     @Singleton
+    fun provideOfflineRepository(): ComicsRepository = DemoComicsRepository()
+
+    @Provides
+    @Singleton
+    @OnlineCatalog
     fun provideRepository(): ComicsRepository {
-        if (BuildConfig.COMICS_BASE_URL.isBlank()) return DemoComicsRepository()
+        if (BuildConfig.COMICS_BASE_URL.isBlank()) return object : ComicsRepository {
+            override suspend fun getComics(): com.example.js_comics.domain.ComicsCatalog =
+                throw com.example.js_comics.domain.ComicsException(com.example.js_comics.domain.ComicsFailure.NETWORK)
+        }
         val client = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
