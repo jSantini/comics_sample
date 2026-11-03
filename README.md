@@ -99,21 +99,80 @@ Old images remain in Git history; replacing current resources does not erase tha
 The Phase 1 toolchain is intentionally retained. A coordinated dependency/toolchain update
 is a separate decision rather than an incidental part of the UI and CI work.
 
-## Run and build
+## Quick Start
 
-Install JDK 17 and Android SDK Platform 34 / Build Tools 34.0.0. Configure `ANDROID_HOME`
-or an ignored `local.properties` with `sdk.dir`. Run commands from the repository root.
+Prerequisites: **JDK 17**, Android Studio with Android SDK Platform 34, Build Tools
+34.0.0 and Platform Tools installed. Use an Android API 21+ emulator/device; the
+existing automated emulator suite uses API 34. Gradle 8.2 is supplied by the checked-in
+wrapper, so a separate Gradle installation is unnecessary. The first build needs
+Internet access for Gradle/dependencies; Offline catalog operation needs no backend.
+
+Clone the repository:
 
 ```bash
-./gradlew --no-daemon --max-workers=2 :app:assembleDebug -PCOMICS_BASE_URL=
+git clone https://github.com/jSantini/comics_sample.git
+cd comics_sample
 ```
 
-Install `app/build/outputs/apk/debug/app-debug.apk` on Android API 21 or newer.
-The empty property explicitly selects the demo; no remote service needs to be configured.
-Gradle/SDK dependencies must first be downloaded or cached. **Offline app behavior does
-not imply a fresh dependency installation can run without Internet access.**
+Open the repository root in Android Studio. Select JDK 17 under
+`Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JDK`, wait for
+Gradle sync, then Run `app` on an emulator/device. SDK discovery can use Android Studio's
+ignored `local.properties` (`sdk.dir`) or the standard `ANDROID_HOME` environment variable.
+No owner-specific paths, Marvel keys, secrets or local backend are required. Do not copy
+another developer's local.properties or user Gradle configuration.
 
-Run only one build/URL verification process at a time in a checkout.
+For terminal builds, JAVA_HOME must point to your JDK 17 and ANDROID_HOME to your installed
+SDK (or use an ignored local.properties). Check the JVM shown by the wrapper:
+
+**Linux / macOS**
+
+```bash
+./gradlew --version
+./gradlew :app:assembleDebug testDebugUnitTest
+./gradlew :app:installDebug
+```
+
+**Windows PowerShell**
+
+```powershell
+.\gradlew.bat --version
+.\gradlew.bat :app:assembleDebug testDebugUnitTest
+.\gradlew.bat :app:installDebug
+```
+
+`installDebug` requires a running emulator or authorized device (`adb devices`). Launch
+**Comics** after installation. It starts in **Offline**, with six bundled stories/covers.
+Tap **Online** to use the public Railway catalog; no extra configuration is needed.
+Existing README screenshots retain their original Offline provenance.
+
+For a build with no configured backend, append `-PCOMICS_BASE_URL=` to the assemble/install
+command on either platform. Offline stays functional; selecting Online then shows a
+recoverable error. Online also requires connectivity and Railway availability.
+The debug APK is `app/build/outputs/apk/debug/app-debug.apk`.
+
+### Conditional Windows KAPT troubleshooting
+
+If `:data:kaptGenerateStubsDebugKotlin` fails with
+`IllegalAccessError: KaptJavaCompiler cannot access com.sun.tools.javac.main.JavaCompiler`,
+first verify JDK 17 in both `gradlew --version` and Android Studio's Gradle JDK. The IDE
+and terminal can otherwise launch Gradle with different JDKs. Inspect personal Gradle
+properties or JVM-option overrides before assuming a repository defect.
+
+The owner reported resolving this specific Windows error with JDK 17 and in-process
+Kotlin compilation. If the same error persists with JDK 17, try the workaround for that
+invocation only:
+
+```powershell
+.\gradlew.bat --no-daemon :app:assembleDebug testDebugUnitTest -Pkotlin.compiler.execution.strategy=in-process
+```
+
+The equivalent Linux/macOS syntax is `./gradlew` followed by the same arguments.
+This is a conditional diagnostic workaround, not a universal prerequisite. Do not add
+it globally or change tracked gradle.properties merely to reproduce an owner's setup.
+Record the JDK, original error and results with/without it when reporting a build issue.
+
+Run only one build/URL verification process at a time in a checkout. Additional lint,
+URL-security and instrumented-test commands remain in [Tests and reproducible checks](#tests-and-reproducible-checks).
 
 ## Architecture
 
